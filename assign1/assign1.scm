@@ -44,12 +44,12 @@
         (int (fmt "%.2f" (* 255 (/ (+ 1 (sin(+ (* (/ value 100) (- (* 2 pi) (/ pi 2))) (/ pi 2)))) 2)))))
     (string+ "#" (fmt "%02X" (find_cyan)) (fmt "%02X" (find_yellow)) (fmt "%02X" (find_magenta))))
 (define (run3)
-    (inspect (cym (real 100))))
+    (inspect (cym (real 75))))
 
 ; Task 4
 (define (goodGuess? guess x)
     (define (fifth n) (* n n n n n))
-    (< (abs (- (fifth guess) x)) 0.001))
+    (< (abs (- (fifth guess) x)) 0.000001))
 
 (define (improve guess x)
     (define (fourth n) (* n n n n))
@@ -64,7 +64,7 @@
     (rootIter 1.0 n))
 
 (define (run4)
-    (inspect (root5 969696)))
+    (inspect (root5 32)))
 
 ; Task 5
 (define (bico i j)
@@ -195,3 +195,4 @@
     (inspect (iramanujan 50)))
 
 (println "assignment 1 loaded!")
+(run3)
