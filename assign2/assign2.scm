@@ -120,22 +120,25 @@
 
 ;===================================Task 4======================================
 (define (no-locals code)
-    (define (iter d c)
+    (define (iter c params args body)
         (cond
-            ((equal? (string c) "nil")) ; Done
+            ((equal? (string c) "nil") (println params) (println args) (println body))
             (else
-                (println (car (car c)))
-                (iter d (cdr c)))))
+                (if (equal? (car (car c)) 'define)
+                    (iter (cdr c) (append params (list (cadr (car c)))) (append args (list (caddr (car c)))) body)
+                    (iter (cdr c) params args (append body (car c)))))))
     (define def (cons (car code) (cons (car (cdr code)) nil)))
     (println def)
-    (iter def (cdr (cdr code))))
+    (iter (cdr (cdr code)) '() '() '()))
 
 (define (run4)
-    (no-locals
-        (quote
-            (define (nsq a)
-                (define x (+ a 1))
-                (* x x)))))
+    (println (no-locals
+        '(define (nsq a)
+            (define x (+ a 1))
+            (define y (- a 1))
+            (if (= x 0)
+                (+ x 100)
+                (* x y))))))
 
 
 ;===================================Task 5======================================
@@ -167,4 +170,4 @@
 
 ;===================================Task 10=====================================
 
-(run3)
+(run4)
