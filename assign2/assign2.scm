@@ -14,7 +14,9 @@
             (println $expr " is " result
                 " (it should be " target ")")))
 
-; Task 1
+
+;===================================Task 1======================================
+
 (define (iterate # $x items $)
     (define l
         (cons 'lambda (cons (cons $x nil) $)))
@@ -24,7 +26,9 @@
 (define (run1)
     (iterate i (list 1 2 3 4) (inspect i) (inspect (* i i))))
 
-; Task 2
+
+;===================================Task 2======================================
+
 (define (peval f @)
     (define args @)
     (define returnArgs (list))
@@ -60,13 +64,91 @@
     (exprTest ((peval i 4)) 16)
     (exprTest ((peval i .) 4) 16))
 
-; Task 3
-; Task 4
-; Task 5
-; Task 6
-; Task 7
 
-; Task 8
+;===================================Task 3======================================
+
+; Stack Class and Methods
+(define (Stack) '())
+(define (push stack data)
+    (append stack (list data)))
+(define (pop stack)
+    (define (helper s newStack)
+        (cond
+            ((null? (cdr s)) newStack)
+            (else (helper (cdr s) (append newStack (list (car s)))))))
+    (helper stack '()))
+(define (speek stack)
+    (cond
+        ((null? (cdr stack)) (car stack))
+        (else (speek (cdr stack)))))
+(define (ssize stack)
+    (length stack))
+
+; Queue Class and Methods
+(define (Queue) '())
+(define (enqueue queue data)
+    (append queue (list data)))
+(define (dequeue queue)
+    (cdr queue))
+(define (qpeek queue)
+    (car queue))
+(define (qsize queue)
+    (length queue))
+
+(define (run3)
+    (define (loop stack queue)
+        (define x (readInt))
+        (if (eof?)
+            (list stack queue)
+            (loop (push stack x) (enqueue queue x))))
+    (define (popper s)
+        (cond
+            ((!= (ssize s) 0)
+                (inspect (speek s))
+                (popper (pop s)))))
+    (define (dequeuer q)
+        (cond
+            ((!= (qsize q) 0)
+                (inspect (qpeek q))
+                (dequeuer (dequeue q)))))
+    (define oldStream (setPort (open "data.ints" 'read)))
+    (define data (loop (Stack) (Queue)))
+    (popper (car data))
+    (dequeuer (cadr data))
+    (setPort oldStream))
+
+
+;===================================Task 4======================================
+(define (no-locals code)
+    (define (iter d c)
+        (cond
+            ((equal? (string c) "nil")) ; Done
+            (else
+                (println (car (car c)))
+                (iter d (cdr c)))))
+    (define def (cons (car code) (cons (car (cdr code)) nil)))
+    (println def)
+    (iter def (cdr (cdr code))))
+
+(define (run4)
+    (no-locals
+        (quote
+            (define (nsq a)
+                (define x (+ a 1))
+                (* x x)))))
+
+
+;===================================Task 5======================================
+
+
+;===================================Task 6======================================
+
+
+;===================================Task 7======================================
+
+
+;===================================Task 8======================================
+
 (define (cxr sym)
     (define (helper x sym)
         (define char (car (string sym)))
@@ -79,7 +161,10 @@
 (define (run8)
     (inspect ((cxr 'add) '(1 2 3 4 5 6))))
 
-; Task 9
-; Task 10
 
-(run2)
+;===================================Task 9======================================
+
+
+;===================================Task 10=====================================
+
+(run3)
