@@ -119,26 +119,33 @@
 
 
 ;===================================Task 4======================================
+
 (define (no-locals code)
+    (define def (cons (car code) (cons (car (cdr code)) nil)))
     (define (iter c params args body)
         (cond
-            ((equal? (string c) "nil") (println params) (println args) (println body))
+            ((equal? (string c) "nil")
+                (append def (cons (cons (cons 'lambda (cons params (cons body nil))) args) nil)))
             (else
-                (if (equal? (car (car c)) 'define)
+                (if (and (> (length c) 1) (equal? (car (car c)) 'define))
                     (iter (cdr c) (append params (list (cadr (car c)))) (append args (list (caddr (car c)))) body)
                     (iter (cdr c) params args (append body (car c)))))))
-    (define def (cons (car code) (cons (car (cdr code)) nil)))
-    (println def)
     (iter (cdr (cdr code)) '() '() '()))
 
 (define (run4)
+    (println (no-locals '(define (f) (define x 3) 1)))
     (println (no-locals
         '(define (nsq a)
             (define x (+ a 1))
             (define y (- a 1))
             (if (= x 0)
                 (+ x 100)
-                (* x y))))))
+                (* x y)))))
+    (println (no-locals
+        (quote
+            (define (nsq a)
+                (define x (+ a 1))
+                (* x x))))))
 
 
 ;===================================Task 5======================================
