@@ -69,18 +69,24 @@
 
 ; Stack Class and Methods
 (define (Stack) '())
+;(define (person)
+;        (define name)
+;        (define age)
+;        this
+;        )
+;(define (Stack)
+;    (define store '())
+;    (define size 0)
+;    this)
+
 (define (push stack data)
-    (append stack (list data)))
+    (cons data stack))
+;(define (push stack data)
+;    (cons data (stack 'store)))
 (define (pop stack)
-    (define (helper s newStack)
-        (cond
-            ((null? (cdr s)) newStack)
-            (else (helper (cdr s) (append newStack (list (car s)))))))
-    (helper stack '()))
+    (cdr stack))
 (define (speek stack)
-    (cond
-        ((null? (cdr stack)) (car stack))
-        (else (speek (cdr stack)))))
+    (car stack))
 (define (ssize stack)
     (length stack))
 
@@ -104,12 +110,12 @@
     (define (popper s)
         (cond
             ((!= (ssize s) 0)
-                (inspect (speek s))
+                ;(inspect (speek s))
                 (popper (pop s)))))
     (define (dequeuer q)
         (cond
             ((!= (qsize q) 0)
-                (inspect (qpeek q))
+                ;(inspect (qpeek q))
                 (dequeuer (dequeue q)))))
     (define oldStream (setPort (open "data.ints" 'read)))
     (define data (loop (Stack) (Queue)))
@@ -153,6 +159,21 @@
 
 ;===================================Task 6======================================
 
+(define (treeNode value left right)
+    (list value left right))
+
+(define (constructTree)
+    (treeNode 5
+        (treeNode 3 (treeNode 1 nil nil) (treeNode 5 nil nil))
+        (treeNode 9 nil (treeNode 11 nil nil))))
+(define (treeflatten)
+    )
+(define (treedepth tree))
+    ; return a real number plz)
+
+(define (run6)
+    (define tree (constructTree))
+    (println tree))
 
 ;===================================Task 7======================================
 
@@ -177,4 +198,4 @@
 
 ;===================================Task 10=====================================
 
-(run4)
+(run6)
