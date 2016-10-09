@@ -116,12 +116,12 @@
         (cond
             ((!= (qsize q) 0)
                 ;(inspect (qpeek q))
-                (dequeuer (dequeue q)))))
-    (define oldStream (setPort (open "data.ints" 'read)))
-    (define data (loop (Stack) (Queue)))
-    (popper (car data))
-    (dequeuer (cadr data))
-    (setPort oldStream))
+                (dequeuer (dequeue q))))))
+    ;(define oldStream (setPort (open "data.ints" 'read)))
+    ;(define data (loop (Stack) (Queue)))
+    ;(popper (car data))
+    ;(dequeuer (cadr data))
+    ;(setPort oldStream))
 
 
 ;===================================Task 4======================================
@@ -159,21 +159,44 @@
 
 ;===================================Task 6======================================
 
-(define (treeNode value left right)
-    (list value left right))
+(define (treeflatten tree)
+    (define (helper tree depth lyst)
+        (cond
+            ((null? tree) lyst)
+            (else
+                (helper (cadr tree)
+                        (+ depth 1)
+                        (cons (list depth (car tree))
+                              (helper (caddr tree) (+ depth 1) lyst))))))
+    (helper tree 0 '()))
 
-(define (constructTree)
-    (treeNode 5
-        (treeNode 3 (treeNode 1 nil nil) (treeNode 5 nil nil))
-        (treeNode 9 nil (treeNode 11 nil nil))))
-(define (treeflatten)
-    )
-(define (treedepth tree))
+(define (accumulate op initial sequence)
+    (if (null? sequence)
+        initial
+        (op (car sequence)
+            (accumulate op initial (cdr sequence)))))
+
+(define (treedepth tree)
+    (println "THIS IS THE TREE: " tree)
+    (define flatTree (treeflatten tree))
+    (inspect (accumulate + 0 (map car flatTree)))
+    (inspect (length flatTree))
+    (/ (real (accumulate + 0 (map car flatTree))) (real (length flatTree))))
     ; return a real number plz)
 
 (define (run6)
+    (define (treeNode value left right)
+        (list value left right))
+
+    (define (constructTree)
+        (treeNode 7
+            (treeNode 3 (treeNode 1 nil nil)
+                        (treeNode 5 nil nil))
+            (treeNode 9 nil
+                        (treeNode 11 nil nil))))
+
     (define tree (constructTree))
-    (println tree))
+    (inspect (treedepth tree)))
 
 ;===================================Task 7======================================
 
