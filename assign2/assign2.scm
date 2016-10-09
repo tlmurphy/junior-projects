@@ -156,8 +156,39 @@
 
 ;===================================Task 5======================================
 
+(define (pred church)
+    (define zero (lambda (f) (lambda (x) x)))
+    (define (f a) (cons 1 a))
+    (define (add-1 n)
+        (lambda (f) (lambda (x) (f ((n f) x)))))
+    (define (helper previous current)
+        (cond
+            ((equal? ((church f) nil) ((current f) nil)) previous)
+            (else
+                (helper current (add-1 current)))))
+
+    (helper zero (add-1 zero)))
+
+(define (run5)
+    (define (f a) (cons 1 a))
+    (define zero (lambda (f) (lambda (x) x)))
+    (define two (lambda (f) (lambda (x) (f (f x)))))
+    (define three (lambda (f) (lambda (x) (f (f (f x))))))
+    (define (add-1 n)
+        (lambda (f) (lambda (x) (f ((n f) x)))))
+    (inspect (equal? (((pred two) f) nil) (((add-1 zero) f) nil))))
+
 
 ;===================================Task 6======================================
+
+(define (treeNode value left right)
+    (list value left right))
+
+(define (accumulate op initial sequence)
+    (if (null? sequence)
+        initial
+        (op (car sequence)
+            (accumulate op initial (cdr sequence)))))
 
 (define (treeflatten tree)
     (define (helper tree depth lyst)
@@ -170,19 +201,12 @@
                               (helper (caddr tree) (+ depth 1) lyst))))))
     (helper tree 0 '()))
 
-(define (accumulate op initial sequence)
-    (if (null? sequence)
-        initial
-        (op (car sequence)
-            (accumulate op initial (cdr sequence)))))
+
 
 (define (treedepth tree)
-    (println "THIS IS THE TREE: " tree)
     (define flatTree (treeflatten tree))
-    (inspect (accumulate + 0 (map car flatTree)))
-    (inspect (length flatTree))
+    (accumulate + 0 (map car flatTree))
     (/ (real (accumulate + 0 (map car flatTree))) (real (length flatTree))))
-    ; return a real number plz)
 
 (define (run6)
     (define (treeNode value left right)
@@ -221,4 +245,4 @@
 
 ;===================================Task 10=====================================
 
-(run6)
+(run5)
