@@ -170,6 +170,8 @@
     (helper zero (add-1 zero)))
 
 (define (run5)
+    (define (inc n)
+        (+ n 1))
     (define (f a) (cons 1 a))
     (define zero (lambda (f) (lambda (x) x)))
     (define two (lambda (f) (lambda (x) (f (f x)))))
@@ -191,20 +193,17 @@
             (accumulate op initial (cdr sequence)))))
 
 (define (treeflatten tree)
-    (define (helper tree depth lyst)
+    (define (helper tree depth)
         (cond
-            ((null? tree) lyst)
-            (else
-                (helper (cadr tree)
-                        (+ depth 1)
-                        (cons (list depth (car tree))
-                              (helper (caddr tree) (+ depth 1) lyst))))))
-    (helper tree 0 '()))
-
-
+            ((null? tree))
+            ((and (equal? (cadr tree) nil) (equal? (caddr tree) nil)) (list (list depth (car tree))))
+            (else (append (helper (cadr tree) (+ depth 1))
+                          (helper (caddr tree) (+ depth 1))))))
+    (helper tree 0))
 
 (define (treedepth tree)
     (define flatTree (treeflatten tree))
+    (println flatTree)
     (accumulate + 0 (map car flatTree))
     (/ (real (accumulate + 0 (map car flatTree))) (real (length flatTree))))
 
@@ -217,7 +216,9 @@
             (treeNode 3 (treeNode 1 nil nil)
                         (treeNode 5 nil nil))
             (treeNode 9 nil
-                        (treeNode 11 nil nil))))
+                        (treeNode 11 (treeNode 4 (treeNode 7 nil nil)
+                                                  nil)
+                                      (treeNode 40 nil nil)))))
 
     (define tree (constructTree))
     (inspect (treedepth tree)))
@@ -245,4 +246,4 @@
 
 ;===================================Task 10=====================================
 
-(run5)
+(run6)
