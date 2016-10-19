@@ -14,6 +14,8 @@
             (println $expr " is " result
                 " (it should be " target ")")))
 
+(include "table.scm") ; Used for task 9 and 10
+
 
 ;===================================Task 1======================================
 
@@ -223,6 +225,7 @@
     (define tree (constructTree))
     (inspect (treedepth tree)))
 
+
 ;===================================Task 7======================================
 
 
@@ -243,7 +246,110 @@
 
 ;===================================Task 9======================================
 
+(define old+ +)
+(define old- -)
+(define old* *)
+(define old/ /)
+
+(define (addStrings a b) (string+ a b))
+
+(define (stringPlusNum a b) (string+ a (string b)))
+
+(define (numPlusString a b) (old+ a (int b)))
+
+(define (numMinusString a b) (old- a (int b)))
+
+(define (stringMinusNum a b)
+    (define (helper str num)
+        (cond
+            ((equal? (string str) "nil") "nil")
+            ((= num 0) str)
+            (else (helper (cdr str) (old- num 1)))))
+    (helper a b))
+
+(define (stringTimesNum a b)
+    (define (helper str num)
+        (if (= num 0)
+            str
+            (helper (string+ str a) (old- num 1))))
+    (helper "" b))
+
+(define (numTimesString a b) (old* a (int b)))
+
+(define (numDivideString a b)
+    (old/ a (int b)))
+
+(define (apply-generic operator operand1 operand2)
+    (apply (getTable operator (list (type operand1) (type operand2)))
+           (list operand1 operand2)))
+
+
+(define (install-generic)
+    (clearTable)
+    (set! + (lambda (a b) (apply-generic '+ a b)))
+    (set! - (lambda (a b) (apply-generic '- a b)))
+    (set! * (lambda (a b) (apply-generic '* a b)))
+    (set! / (lambda (a b) (apply-generic '/ a b)))
+    (putTable '+ '(STRING STRING) addStrings)
+    (putTable '+ '(STRING INTEGER) stringPlusNum)
+    (putTable '+ '(INTEGER STRING) numPlusString)
+    (putTable '- '(INTEGER STRING) numMinusString)
+    (putTable '- '(STRING INTEGER) stringMinusNum)
+    (putTable '* '(STRING INTEGER) stringTimesNum)
+    (putTable '* '(INTEGER STRING) numTimesString)
+    (putTable '/ '(INTEGER STRING) numDivideString)
+    ; Old operators
+    (putTable '+ '(INTEGER INTEGER) old+)
+    (putTable '- '(INTEGER INTEGER) old-)
+    (putTable '* '(INTEGER INTEGER) old*)
+    (putTable '/ '(INTEGER INTEGER) old/)
+    'generic-system-installed
+    )
+
+(define (uninstall-generic)
+    (set! + old+)
+    (set! - old-)
+    (set! * old*)
+    (set! / old/)
+    'generic-system-uninstalled
+    )
+
+(define (run9)
+    (install-generic)
+    (inspect (+ "x" "y"))
+    (inspect (+ "123" 4))
+    (inspect (+ 123 "4"))
+    (inspect (- 123 "4"))
+    (inspect (- "abc" 1))
+    (inspect (* "abc" 3))
+    (inspect (* 3 "33"))
+    (inspect (/ 8 "2"))
+    (inspect (+ 9 0))
+    (inspect (/ 10 5))
+    (uninstall-generic))
 
 ;===================================Task 10=====================================
 
-(run6)
+(define (int->real a) (real a))
+(define (int->string a) (string a))
+(define (real->int a) (int a))
+(define (real->string a) (string a))
+(define (string->int a) (int a))
+(define (string->real a) (real a))
+(define (list->string))
+(define (install-coercion)
+    (clearTable)
+    (putTable 'INTEGER 'REAL int->real)
+    'generic-system-installed
+    )
+
+(define (coerce value type)
+    (apply (getTable (type value) type)
+           value))
+
+(define (run10)
+    (install-coercion)
+
+    (coerce "123.4" 'INTEGER)
+    (coerce '(1 (2.2) ((3 4) "5")) 'STRING)
+    (type (coerce '(1 (2.2) ((3 4) "5")) 'STRING)))
