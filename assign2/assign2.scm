@@ -228,6 +228,47 @@
 
 ;===================================Task 7======================================
 
+; Filter function from SICP
+(define (filter predicate sequence)
+    (cond
+        ((null? sequence) nil)
+        ((predicate (car sequence)) (cons (car sequence)
+                                          (filter predicatee (cdr sequence))))
+        (else (filter predicate (cdr sequence)))))
+
+; FlatMap function from SICP
+(define (flatmap proc seq)
+    (accumulate append nil (map proc seq)))
+
+; Enumerate-Interval function from SICP
+(define (enumerate-interval low high)
+    (if (> low high)
+        nil
+        (cons low (enumerate-interval (+ low 1) high))))
+
+(define (adjoin-position r k q))
+
+(define (safe? k p))
+
+(define empty-board '())
+
+(define (queens board-size)
+    (define (queen-cols k)
+        (if (= k 0)
+            (list empty-board)
+            (filter
+                (lambda (positions) (safe? k positions))
+                (flatmap
+                    (lambda (rest-of-queens)
+                        (map (lambda (new-row)
+                                (adjoin-position new-row k rest-of-queens))
+                             (enumerate-interval 1 board-size)))
+                    (queen-cols (- k 1))))))
+  (queen-cols board-size))
+(define (run7)
+    (queens 8))
+
+(run7)
 
 ;===================================Task 8======================================
 
@@ -364,5 +405,3 @@
     ;(coerce '(1 (2.2) ((3 4) "5")) 'STRING)
     ;(type (coerce '(1 (2.2) ((3 4) "5")) 'STRING)))
     )
-
-(run10)
