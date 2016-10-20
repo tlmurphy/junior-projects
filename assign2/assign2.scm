@@ -233,7 +233,7 @@
     (cond
         ((null? sequence) nil)
         ((predicate (car sequence)) (cons (car sequence)
-                                          (filter predicatee (cdr sequence))))
+                                          (filter predicate (cdr sequence))))
         (else (filter predicate (cdr sequence)))))
 
 ; FlatMap function from SICP
@@ -246,15 +246,28 @@
         nil
         (cons low (enumerate-interval (+ low 1) high))))
 
-(define (adjoin-position r k q))
+(define (getRow position)
+    (car position))
 
-(define (safe? k p))
+(define (getCol position)
+    (cdr position))
+
+(define (adjoin-position r k q)
+    (cons (cons r (cons k nil)) q))
+
+(define (safe? col positions)
+    (println col)
+    (println positions))
+    ;(define (helper pos)
+    ;    (cond
+    ;        ((car (getRow positions))))
+(safe? 2 '((3 3) (0 3)))
 
 (define empty-board '())
 
 (define (queens board-size)
     (define (queen-cols k)
-        (if (= k 0)
+        (if (< k 0)
             (list empty-board)
             (filter
                 (lambda (positions) (safe? k positions))
@@ -262,11 +275,12 @@
                     (lambda (rest-of-queens)
                         (map (lambda (new-row)
                                 (adjoin-position new-row k rest-of-queens))
-                             (enumerate-interval 1 board-size)))
+                             (enumerate-interval 0 board-size)))
                     (queen-cols (- k 1))))))
-  (queen-cols board-size))
+    (queen-cols board-size))
+
 (define (run7)
-    (queens 8))
+    (queens 6))
 
 (run7)
 
