@@ -3,11 +3,11 @@
 ; Written by Trevor Murphy
 
 (define (author)
-        (println "Trevor Murphy tmurphy2@crimson.ua.edu"))
+    (println "Trevor Murphy tmurphy2@crimson.ua.edu"))
 
 ; For testing purposes
 (define (exprTest # $expr target)
-        (define result (catch (eval $expr #)))
+    (define result (catch (eval $expr #)))
         (if (error? result)
             (println $expr " is EXCEPTION: " (result'value)
                 " (it should be " target ")")
@@ -35,7 +35,7 @@
     (define args @)
     (define returnArgs (list))
     (define (replaceMissing args largs returnArgs)
-        (if (equal? (string args) "nil")
+        (if (null? args)
             returnArgs
             (if (equal? 'MISSING (car args))
                 (replaceMissing (cdr args) (cdr largs) (append returnArgs (list (car largs))))
@@ -112,18 +112,18 @@
     (define (popper s)
         (cond
             ((!= (ssize s) 0)
-                ;(inspect (speek s))
+                (inspect (speek s))
                 (popper (pop s)))))
     (define (dequeuer q)
         (cond
             ((!= (qsize q) 0)
-                ;(inspect (qpeek q))
-                (dequeuer (dequeue q))))))
-    ;(define oldStream (setPort (open "data.ints" 'read)))
-    ;(define data (loop (Stack) (Queue)))
-    ;(popper (car data))
-    ;(dequeuer (cadr data))
-    ;(setPort oldStream))
+                (inspect (qpeek q))
+                (dequeuer (dequeue q)))))
+    (define oldStream (setPort (open "data.ints" 'read)))
+    (define data (loop (Stack) (Queue)))
+    (popper (car data))
+    (dequeuer (cadr data))
+    (setPort oldStream))
 
 
 ;===================================Task 4======================================
@@ -132,7 +132,7 @@
     (define def (cons (car code) (cons (car (cdr code)) nil)))
     (define (iter c params args body)
         (cond
-            ((equal? (string c) "nil")
+            ((null? c)
                 (append def (cons (cons (cons 'lambda (cons params (cons body nil))) args) nil)))
             (else
                 (if (and (> (length c) 1) (equal? (car (car c)) 'define))
@@ -154,6 +154,7 @@
             (define (nsq a)
                 (define x (+ a 1))
                 (* x x))))))
+(run4)
 
 
 ;===================================Task 5======================================
@@ -205,7 +206,6 @@
 
 (define (treedepth tree)
     (define flatTree (treeflatten tree))
-    (println flatTree)
     (accumulate + 0 (map car flatTree))
     (/ (real (accumulate + 0 (map car flatTree))) (real (length flatTree))))
 
@@ -279,10 +279,10 @@
                     (queen-cols (- k 1))))))
     (queen-cols board-size))
 
-(define (run7)
-    (queens 6))
-
-(run7)
+;(define (run7)
+;    (queens 6))
+;
+;(run7)
 
 ;===================================Task 8======================================
 
@@ -290,7 +290,7 @@
     (define (helper x sym)
         (define char (car (string sym)))
         (cond
-            ((equal? (string sym) "nil") x)
+            ((null? sym) x)
             ((equal? char "a") (car (helper x (cdr (string sym)))))
             ((equal? char "d") (cdr (helper x (cdr (string sym)))))))
     (lambda (x) (helper x sym)))
@@ -317,7 +317,7 @@
 (define (stringMinusNum a b)
     (define (helper str num)
         (cond
-            ((equal? (string str) "nil") "nil")
+            ((null? str) "nil")
             ((= num 0) str)
             (else (helper (cdr str) (old- num 1)))))
     (helper a b))
@@ -335,8 +335,11 @@
     (old/ a (int b)))
 
 (define (apply-generic operator operand1 operand2)
-    (apply (getTable operator (list (type operand1) (type operand2)))
-           (list operand1 operand2)))
+    (define func (getTable operator (list (type operand1) (type operand2))))
+    (if (null? func)
+        (apply (getTable operator '(BUTTER FINGER))
+               (list operand1 operand2))
+        (apply func (list operand1 operand2))))
 
 
 (define (install-generic)
@@ -354,10 +357,10 @@
     (putTable '* '(INTEGER STRING) numTimesString)
     (putTable '/ '(INTEGER STRING) numDivideString)
     ; Old operators
-    (putTable '+ '(INTEGER INTEGER) old+)
-    (putTable '- '(INTEGER INTEGER) old-)
-    (putTable '* '(INTEGER INTEGER) old*)
-    (putTable '/ '(INTEGER INTEGER) old/)
+    (putTable '+ '(BUTTER FINGER) old+)
+    (putTable '- '(BUTTER FINGER) old-)
+    (putTable '* '(BUTTER FINGER) old*)
+    (putTable '/ '(BUTTER FINGER) old/)
     'generic-system-installed
     )
 
@@ -382,6 +385,8 @@
     (inspect (+ 9 0))
     (inspect (/ 10 5))
     (uninstall-generic))
+
+(run9)
 
 ;===================================Task 10=====================================
 
@@ -419,3 +424,5 @@
     ;(coerce '(1 (2.2) ((3 4) "5")) 'STRING)
     ;(type (coerce '(1 (2.2) ((3 4) "5")) 'STRING)))
     )
+
+(println "assignment 2 loaded!")
