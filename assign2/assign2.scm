@@ -154,7 +154,6 @@
             (define (nsq a)
                 (define x (+ a 1))
                 (* x x))))))
-(run4)
 
 
 ;===================================Task 5======================================
@@ -238,7 +237,7 @@
 
 ; FlatMap function from SICP
 (define (flatmap proc seq)
-    (accumulate append nil (map proc seq)))
+    (accumulate append '() (map proc seq)))
 
 ; Enumerate-Interval function from SICP
 (define (enumerate-interval low high)
@@ -246,22 +245,39 @@
         nil
         (cons low (enumerate-interval (+ low 1) high))))
 
+(define (make-position r c)
+    (cons r c))
+
 (define (getRow position)
     (car position))
 
 (define (getCol position)
-    (cdr position))
+    (car (cdr position)))
 
-(define (adjoin-position r k q)
-    (cons (cons r (cons k nil)) q))
+(define (adjoin-position row col positions)
+    (append positions (list (cons row (cons col nil)))))
+
+(define (list-ref items n)
+    (if (= n 0)
+        (car items)
+        (list-ref (cdr items) (- n 1))))
 
 (define (safe? col positions)
-    (println col)
-    (println positions))
-    ;(define (helper pos)
-    ;    (cond
-    ;        ((car (getRow positions))))
-(safe? 2 '((3 3) (0 3)))
+    (define kth-queen (list-ref positions col))
+    (define other-queens (filter (lambda (q) (not (= col (getCol q))))
+                                 positions))
+
+    (define (notSafe q1 q2)
+        (if (or (= (getRow q1) (getRow q2))
+                (= (abs (- (getRow q1) (getRow q2)))
+                   (abs (- (getCol q1) (getCol q2))))) #t))
+
+    (define (iter q board)
+        (or (null? board)
+            (and (not (notSafe q (car board)))
+                 (iter q (cdr board)))))
+
+    (iter kth-queen other-queens))
 
 (define empty-board '())
 
@@ -273,16 +289,22 @@
                 (lambda (positions) (safe? k positions))
                 (flatmap
                     (lambda (rest-of-queens)
-                        (map (lambda (new-row)
+                        (map (lambda (new-row) (println new-row )
                                 (adjoin-position new-row k rest-of-queens))
-                             (enumerate-interval 0 board-size)))
+                             (enumerate-interval 0 (- board-size 1))))
                     (queen-cols (- k 1))))))
-    (queen-cols board-size))
 
-;(define (run7)
-;    (queens 6))
-;
-;(run7)
+    (define queenResult (queen-cols (- board-size 1)))
+
+    (if (null? queenResult)
+        (list '())
+        queenResult))
+
+(define (run7)
+    (println (queens 4)))
+
+(run7)
+
 
 ;===================================Task 8======================================
 
@@ -386,7 +408,6 @@
     (inspect (/ 10 5))
     (uninstall-generic))
 
-(run9)
 
 ;===================================Task 10=====================================
 
