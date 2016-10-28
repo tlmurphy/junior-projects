@@ -69,39 +69,30 @@
 
 ;===================================Task 3======================================
 
-; Stack Class and Methods
-(define (Stack) '())
-;(define (person)
-;        (define name)
-;        (define age)
-;        this
-;        )
-;(define (Stack)
-;    (define store '())
-;    (define size 0)
-;    this)
+; constructor function is used to create a stack and queue
+(define (constructor lyst size) this)
 
+; Stack Class and Methods
+(define (Stack) (constructor nil 0))
 (define (push stack data)
-    (cons data stack))
-;(define (push stack data)
-;    (cons data (stack 'store)))
+    (constructor (cons data (stack 'lyst)) (+ (stack 'size) 1)))
 (define (pop stack)
-    (cdr stack))
+    (constructor (cdr (stack 'lyst)) (- (stack 'size) 1)))
 (define (speek stack)
-    (car stack))
+    (car (stack 'lyst)))
 (define (ssize stack)
-    (length stack))
+    (stack 'size))
 
 ; Queue Class and Methods
-(define (Queue) '())
+(define (Queue) (constructor nil 0))
 (define (enqueue queue data)
-    (append queue (list data)))
+    (constructor (append (queue 'lyst) (list data)) (+ (queue 'size) 1)))
 (define (dequeue queue)
-    (cdr queue))
+    (constructor (cdr (queue 'lyst)) (- (queue 'size) 1)))
 (define (qpeek queue)
-    (car queue))
+    (car (queue 'lyst)))
 (define (qsize queue)
-    (length queue))
+    (queue 'size))
 
 (define (run3)
     (define (loop stack queue)
@@ -131,6 +122,11 @@
 (define (no-locals code)
     (define def (cons (car code) (cons (car (cdr code)) nil)))
     (define (iter c params args body)
+        ;(println "C: " c)
+        ;(println "params: " params)
+        ;(println "args: " args)
+        ;(println "body: " body)
+        ;(println "LENGTH: " (length c))
         (cond
             ((null? c)
                 (append def (cons (cons (cons 'lambda (cons params (cons body nil))) args) nil)))
@@ -141,35 +137,45 @@
     (iter (cdr (cdr code)) '() '() '()))
 
 (define (run4)
-    (println (no-locals '(define (f) (define x 3) 1)))
-    (println (no-locals
+    ;(inspect (no-locals '(define (f) (define x 3) 1)))
+    ;(inspect (no-locals
+    ;    '(define (nsq a)
+    ;        (define x (+ a 1))
+    ;        (define y (- a 1))
+    ;        (if (= x 0)
+    ;            (+ x 100)
+    ;            (* x y)))))
+    ;(inspect (no-locals
+    ;    (quote
+    ;        (define (nsq a)
+    ;            (define x (+ a 1))
+    ;            (* x x)))))
+
+    (inspect (no-locals
         '(define (nsq a)
-            (define x (+ a 1))
-            (define y (- a 1))
-            (if (= x 0)
-                (+ x 100)
-                (* x y)))))
-    (println (no-locals
-        (quote
-            (define (nsq a)
-                (define x (+ a 1))
-                (* x x))))))
+            (define square (lambda (x) (* x x)))))))
+
+    (define (nsq a)
+        (define square (lambda (x) (* x x)))
+            (square a))
+
+    (define (nsq2 a) ((lambda (square) (square 9)) (lambda (x) (* x x))))
+
+
+(inspect (nsq 9))
+(inspect (nsq2 9))
+(run4)
 
 
 ;===================================Task 5======================================
 
-(define (pred church)
-    (define zero (lambda (f) (lambda (x) x)))
-    (define (f a) (cons 1 a))
-    (define (add-1 n)
-        (lambda (f) (lambda (x) (f ((n f) x)))))
-    (define (helper previous current)
-        (cond
-            ((equal? ((church f) nil) ((current f) nil)) previous)
-            (else
-                (helper current (add-1 current)))))
-
-    (helper zero (add-1 zero)))
+(define pred
+    (lambda (n)
+        (lambda (f)
+            (lambda (x)
+                (((n (lambda (a) (lambda (b) (b (a f)))))
+                  (lambda (c) x))
+                 (lambda (c) c))))))
 
 (define (run5)
     (define (inc n)
@@ -196,6 +202,7 @@
 
 (define (treeflatten tree)
     (define (helper tree depth)
+        (println tree)
         (cond
             ((null? tree))
             ((and (equal? (cadr tree) nil) (equal? (caddr tree) nil)) (list (list depth (car tree))))
@@ -205,13 +212,10 @@
 
 (define (treedepth tree)
     (define flatTree (treeflatten tree))
-    (accumulate + 0 (map car flatTree))
+    (println flatTree)
     (/ (real (accumulate + 0 (map car flatTree))) (real (length flatTree))))
 
 (define (run6)
-    (define (treeNode value left right)
-        (list value left right))
-
     (define (constructTree)
         (treeNode 7
             (treeNode 3 (treeNode 1 nil nil)
@@ -245,17 +249,8 @@
         nil
         (cons low (enumerate-interval (+ low 1) high))))
 
-(define (make-position r c)
-    (cons r c))
-
-(define (getRow position)
-    (car position))
-
-(define (getCol position)
-    (car (cdr position)))
-
 (define (adjoin-position row col positions)
-    (append positions (list (cons row (cons col nil)))))
+    (append positions (cons (cons row (cons col nil)) nil)))
 
 (define (list-ref items n)
     (if (= n 0)
@@ -263,21 +258,39 @@
         (list-ref (cdr items) (- n 1))))
 
 (define (safe? col positions)
-    (define kth-queen (list-ref positions col))
-    (define other-queens (filter (lambda (q) (not (= col (getCol q))))
-                                 positions))
+    (define (getRow pos) (car pos))
+    (define (getCol pos) (car (cdr pos)))
 
     (define (notSafe q1 q2)
-        (if (or (= (getRow q1) (getRow q2))
-                (= (abs (- (getRow q1) (getRow q2)))
-                   (abs (- (getCol q1) (getCol q2))))) #t))
+        (if (or (= (getRow q1) (getRow q2)) (= (abs (- (getRow q1) (getRow q2)))
+                                               (abs (- (getCol q1) (getCol q2)))))
+            #t
+            #f))
 
     (define (iter q board)
-        (or (null? board)
-            (and (not (notSafe q (car board)))
-                 (iter q (cdr board)))))
+        (cond
+            ((null? board) #t)
+            ((notSafe q (car board)) #f)
+            (else (iter q (cdr board)))))
 
-    (iter kth-queen other-queens))
+    (iter (list-ref positions col) (filter (lambda (q) (not (= col (getCol q))))
+                                           positions)))
+
+(define (sort queens)
+    (define row (lambda (q) (car (car q))))
+    (define col (lambda (q) (car (cdr (car q)))))
+
+    (define (h2 sortedQueens queens)
+        (if (null? queens)
+            (reverse sortedQueens)
+            (h2 (append sortedQueens (list (list (col queens) (row queens)))) (cdr queens))))
+
+    (define (h sortedQueens queens)
+        (if (null? queens)
+            (reverse sortedQueens)
+            (h (append sortedQueens (list (h2 '() (car queens)))) (cdr queens))))
+
+    (h '() queens))
 
 (define empty-board '())
 
@@ -289,7 +302,7 @@
                 (lambda (positions) (safe? k positions))
                 (flatmap
                     (lambda (rest-of-queens)
-                        (map (lambda (new-row) (println new-row )
+                        (map (lambda (new-row)
                                 (adjoin-position new-row k rest-of-queens))
                              (enumerate-interval 0 (- board-size 1))))
                     (queen-cols (- k 1))))))
@@ -298,12 +311,10 @@
 
     (if (null? queenResult)
         (list '())
-        queenResult))
+        (sort queenResult)))
 
 (define (run7)
-    (println (queens 4)))
-
-(run7)
+    (inspect (queens 5)))
 
 
 ;===================================Task 8======================================
@@ -427,6 +438,7 @@
     (putTable 'STRING 'INTEGER string->int)
     (putTable 'STRING 'REAL string->real)
     (putTable 'INTEGER 'STRING int->string)
+    (putTable 'CONS 'STRING list->string)
     'generic-system-installed
     )
 
@@ -442,8 +454,8 @@
     (inspect (coerce 32.11412 'STRING))
     (inspect (coerce "39000" 'INTEGER)) (inspect (coerce "31515.1111" 'INTEGER))
     (inspect (coerce "5.33920" 'REAL)) (inspect (coerce "5" 'REAL))
-    ;(coerce '(1 (2.2) ((3 4) "5")) 'STRING)
-    ;(type (coerce '(1 (2.2) ((3 4) "5")) 'STRING)))
-    )
+    (inspect (coerce '(1 (2.2) ((3 4) "5")) 'STRING))
+    (inspect (type (coerce '(1 (2.2) ((3 4) "5")) 'STRING)))
+    (inspect (coerce '(123.4 (1 (2 1.2)) 678.12) 'STRING)))
 
 (println "assignment 2 loaded!")
