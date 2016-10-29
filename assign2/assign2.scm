@@ -75,46 +75,43 @@
 ; Stack Class and Methods
 (define (Stack) (constructor nil 0))
 (define (push stack data)
-    (constructor (cons data (stack 'lyst)) (+ (stack 'size) 1)))
+    (constructor (cons data (stack 'lyst))
+                 (+ (stack 'size) 1)))
 (define (pop stack)
-    (constructor (cdr (stack 'lyst)) (- (stack 'size) 1)))
+    (constructor (cdr (stack 'lyst))
+                 (- (stack 'size) 1)))
 (define (speek stack)
-    (car (stack 'lyst)))
+    (if (= (stack 'size) 0)
+        'EMPTY
+        (car (stack 'lyst))))
 (define (ssize stack)
     (stack 'size))
 
 ; Queue Class and Methods
 (define (Queue) (constructor nil 0))
 (define (enqueue queue data)
-    (constructor (append (queue 'lyst) (list data)) (+ (queue 'size) 1)))
+    (constructor (append (queue 'lyst) (list data))
+                 (+ (queue 'size) 1)))
 (define (dequeue queue)
-    (constructor (cdr (queue 'lyst)) (- (queue 'size) 1)))
+    (constructor (cdr (queue 'lyst))
+                 (- (queue 'size) 1)))
 (define (qpeek queue)
-    (car (queue 'lyst)))
+    (if (= (queue 'size) 0)
+        'EMPTY
+    (car (queue 'lyst))))
 (define (qsize queue)
     (queue 'size))
 
 (define (run3)
-    (define (loop stack queue)
-        (define x (readInt))
-        (if (eof?)
-            (list stack queue)
-            (loop (push stack x) (enqueue queue x))))
-    (define (popper s)
-        (cond
-            ((!= (ssize s) 0)
-                (inspect (speek s))
-                (popper (pop s)))))
-    (define (dequeuer q)
-        (cond
-            ((!= (qsize q) 0)
-                (inspect (qpeek q))
-                (dequeuer (dequeue q)))))
-    (define oldStream (setPort (open "data.ints" 'read)))
-    (define data (loop (Stack) (Queue)))
-    (popper (car data))
-    (dequeuer (cadr data))
-    (setPort oldStream))
+    (define newStack (push (push (push (push (push (Stack) 7) 10) 10) 10) 0.33))
+    (define newQueue (enqueue (enqueue (enqueue (enqueue (Queue) 10) 50) 50000) 90))
+    (exprTest (speek (pop (pop newStack))) 10)
+    (exprTest (speek (pop (pop (pop (pop (pop newStack)))))) 'EMPTY)
+    (exprTest (ssize (pop (pop (pop newStack)))) 2)
+    (exprTest (qpeek newQueue) 10)
+    (exprTest (qsize newQueue) 4)
+    (exprTest (qsize (dequeue (dequeue (dequeue (dequeue newQueue))))) 0)
+    (exprTest (qpeek (dequeue (dequeue (dequeue (dequeue newQueue))))) 'EMPTY))
 
 
 ;===================================Task 4======================================
@@ -162,8 +159,8 @@
     (define (nsq2 a) ((lambda (square) (square 9)) (lambda (x) (* x x))))
 
 
-(inspect (nsq 9))
-(inspect (nsq2 9))
+;(inspect (nsq 9))
+;(inspect (nsq2 9))
 (run4)
 
 
@@ -186,7 +183,9 @@
     (define three (lambda (f) (lambda (x) (f (f (f x))))))
     (define (add-1 n)
         (lambda (f) (lambda (x) (f ((n f) x)))))
-    (inspect (equal? (((pred two) f) nil) (((add-1 zero) f) nil))))
+    (exprTest (equal? (((pred two) f) nil) (((add-1 zero) f) nil)) #t)
+    (exprTest (not (equal? ((three inc) 10) (((pred three) inc) 10))) #t)
+    (exprTest (equal? (((add-1 (add-1 (add-1 zero))) inc) 45) ((three inc) 45)) #t))
 
 
 ;===================================Task 6======================================
@@ -202,7 +201,6 @@
 
 (define (treeflatten tree)
     (define (helper tree depth)
-        (println tree)
         (cond
             ((null? tree))
             ((and (equal? (cadr tree) nil) (equal? (caddr tree) nil)) (list (list depth (car tree))))
@@ -212,11 +210,10 @@
 
 (define (treedepth tree)
     (define flatTree (treeflatten tree))
-    (println flatTree)
     (/ (real (accumulate + 0 (map car flatTree))) (real (length flatTree))))
 
 (define (run6)
-    (define (constructTree)
+    (define (constructTree1)
         (treeNode 7
             (treeNode 3 (treeNode 1 nil nil)
                         (treeNode 5 nil nil))
@@ -224,9 +221,32 @@
                         (treeNode 11 (treeNode 4 (treeNode 7 nil nil)
                                                   nil)
                                       (treeNode 40 nil nil)))))
+    (define (constructTree2)
+        (treeNode 69 nil nil))
 
-    (define tree (constructTree))
-    (inspect (treedepth tree)))
+    (define (constructTree3)
+        (treeNode 9
+            (treeNode 9
+                (treeNode 1
+                    (treeNode 9
+                        (treeNode 10 nil nil)
+                        (treeNode 90 (treeNode 19
+                                         nil
+                                         (treeNode 10 nil nil))
+                                     (treeNode 20 (treeNode 20
+                                                      (treeNode 89 nil nil)
+                                                      (treeNode 20 (treeNode 90 nil nil) nil))
+                                                  (treeNode 9 nil nil))))
+                    (treeNode 20 nil nil))
+                (treeNode 69 nil nil))
+            (treeNode 6 nil nil)))
+
+    (define tree1 (constructTree1))
+    (define tree2 (constructTree2))
+    (define tree3 (constructTree3))
+    (exprTest (treedepth tree1) 2.7500000000)
+    (exprTest (treedepth tree2) 0) ; A bunch of zeros...
+    (exprTest (treedepth tree3) 4.6250000000))
 
 
 ;===================================Task 7======================================
@@ -249,13 +269,14 @@
         nil
         (cons low (enumerate-interval (+ low 1) high))))
 
-(define (adjoin-position row col positions)
-    (append positions (cons (cons row (cons col nil)) nil)))
-
+; List-ref function from SICP
 (define (list-ref items n)
     (if (= n 0)
         (car items)
         (list-ref (cdr items) (- n 1))))
+
+(define (adjoin-position row col positions)
+    (append positions (cons (cons row (cons col nil)) nil)))
 
 (define (safe? col positions)
     (define (getRow pos) (car pos))
@@ -329,7 +350,14 @@
     (lambda (x) (helper x sym)))
 
 (define (run8)
-    (inspect ((cxr 'add) '(1 2 3 4 5 6))))
+    (define lyst '(1 2 3 4 5 6))
+    (exprTest ((cxr 'add) lyst) 3)
+    (exprTest ((cxr 'a) lyst) 1)
+    (exprTest ((cxr 'ddd) lyst) '(4 5 6))
+    (exprTest ((cxr 'ddddd) lyst) '(6))
+    (exprTest ((cxr 'addddd) lyst) 6)
+    (exprTest (= ((cxr 'adddd) lyst) (caddddr lyst)) #t)
+    (exprTest ((cxr 'dddddd) lyst) '()))
 
 
 ;===================================Task 9======================================
@@ -350,7 +378,7 @@
 (define (stringMinusNum a b)
     (define (helper str num)
         (cond
-            ((null? str) "nil")
+            ((null? str) "")
             ((= num 0) str)
             (else (helper (cdr str) (old- num 1)))))
     (helper a b))
@@ -370,8 +398,10 @@
 (define (apply-generic operator operand1 operand2)
     (define func (getTable operator (list (type operand1) (type operand2))))
     (if (null? func)
+        ; Get the old operator
         (apply (getTable operator '(BUTTER FINGER))
                (list operand1 operand2))
+        ; Get the new operator
         (apply func (list operand1 operand2))))
 
 
@@ -394,29 +424,37 @@
     (putTable '- '(BUTTER FINGER) old-)
     (putTable '* '(BUTTER FINGER) old*)
     (putTable '/ '(BUTTER FINGER) old/)
-    'generic-system-installed
-    )
+    'generic-system-installed)
 
 (define (uninstall-generic)
     (set! + old+)
     (set! - old-)
     (set! * old*)
     (set! / old/)
-    'generic-system-uninstalled
-    )
+    'generic-system-uninstalled)
 
 (define (run9)
     (install-generic)
-    (inspect (+ "x" "y"))
-    (inspect (+ "123" 4))
-    (inspect (+ 123 "4"))
-    (inspect (- 123 "4"))
-    (inspect (- "abc" 1))
-    (inspect (* "abc" 3))
-    (inspect (* 3 "33"))
-    (inspect (/ 8 "2"))
-    (inspect (+ 9 0))
-    (inspect (/ 10 5))
+    (exprTest (+ 0 0) 0)
+    (exprTest (+ "I HATE " "PROGRAMMING") "I HATE PROGRAMMING")
+    (exprTest (+ "hello" 4) "hello4")
+    (exprTest (+ 68 "1.0") 69)
+    (exprTest (+ 89 "a") 89)
+    (exprTest (- 0 0) 0)
+    (exprTest (- 686868 "686868") 0)
+    (exprTest (- 10 "5.6") 5)
+    (exprTest (- "abc" 3) "")
+    (exprTest (/ 0 90) 0)
+    (exprTest (- "abc" 100) "")
+    (exprTest (- "qwertyI'm cramping right now" 6) "I'm cramping right now")
+    (exprTest (* "ayy" 1) "ayy")
+    (exprTest (* "ayy" 0) "")
+    (exprTest (* 3 3) 9)
+    (exprTest (* "ayy" 3) "ayyayyayy")
+    (exprTest (* 3 "23") 69)
+    (exprTest (* 0 "0") 0)
+    (exprTest (/ 69 "3") 23)
+    (exprTest (/ 0 "78888") 0)
     (uninstall-generic))
 
 
@@ -447,15 +485,17 @@
 
 (define (run10)
     (install-coercion)
-    (inspect (coerce "123.4" 'INTEGER))
-    (inspect (coerce 43 'REAL))
-    (inspect (coerce 899 'STRING))
-    (inspect (coerce 6.333 'INTEGER))
-    (inspect (coerce 32.11412 'STRING))
-    (inspect (coerce "39000" 'INTEGER)) (inspect (coerce "31515.1111" 'INTEGER))
-    (inspect (coerce "5.33920" 'REAL)) (inspect (coerce "5" 'REAL))
-    (inspect (coerce '(1 (2.2) ((3 4) "5")) 'STRING))
-    (inspect (type (coerce '(1 (2.2) ((3 4) "5")) 'STRING)))
-    (inspect (coerce '(123.4 (1 (2 1.2)) 678.12) 'STRING)))
+    (exprTest (coerce "123.4" 'INTEGER) 123)
+    (exprTest (coerce 43 'REAL) 43.000000000)
+    (exprTest (coerce 899 'STRING) "899")
+    (exprTest (coerce 6.333 'INTEGER) 6)
+    (exprTest (coerce 32.11412 'STRING) "32.114120")
+    (exprTest (coerce "39000" 'INTEGER) 39000)
+    (exprTest (coerce "31515.1111" 'INTEGER) 31515)
+    (exprTest (coerce "5.33920" 'REAL) 5.3392000000)
+    (exprTest (coerce "5" 'REAL) 5.000000000)
+    (exprTest (coerce '(1 (2.2) ((3 4) "5")) 'STRING) "(1 (2.200000) ((3 4) 5))")
+    (exprTest (type (coerce '(1 (2.2) ((3 4) "5")) 'STRING)) 'STRING)
+    (exprTest (coerce '(123.4 (1 (2 1.2)) 678.12) 'STRING) "(123.400000 (1 (2 1.200000)) 678.120000)"))
 
 (println "assignment 2 loaded!")
