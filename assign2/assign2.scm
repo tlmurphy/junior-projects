@@ -118,50 +118,56 @@
 
 (define (no-locals code)
     (define def (cons (car code) (cons (car (cdr code)) nil)))
+    (define body (cdr (cdr code)))
+
     (define (iter c params args body)
-        ;(println "C: " c)
-        ;(println "params: " params)
-        ;(println "args: " args)
-        ;(println "body: " body)
-        ;(println "LENGTH: " (length c))
         (cond
             ((null? c)
-                (append def (cons (cons (cons 'lambda (cons params (cons body nil))) args) nil)))
+                (if (null? body)
+                    ; No body but local defines exist
+                    (append def (cons (cons (cons 'lambda (cons params nil)) args) nil))
+                    ; Body exists
+                    (append def (cons (cons (cons 'lambda (cons params (cons body nil))) args) nil))))
             (else
-                (if (and (> (length c) 1) (equal? (car (car c)) 'define))
-                    (iter (cdr c) (append params (list (cadr (car c)))) (append args (list (caddr (car c)))) body)
-                    (iter (cdr c) params args (append body (car c)))))))
-    (iter (cdr (cdr code)) '() '() '()))
+                (define element (car c))
+                (if (and (pair? element) (equal? (car element) 'define))
+                    (iter (cdr c) (append params (list (cadr element))) (append args (list (caddr element))) body)
+                    (iter (cdr c) params args (append body element))))))
+
+    (if (null? body)
+        ; Code didn't have a body, so just return the original
+        code
+        ; Else, perform the conversion
+        (iter body '() '() '())))
 
 (define (run4)
-    ;(inspect (no-locals '(define (f) (define x 3) 1)))
-    ;(inspect (no-locals
-    ;    '(define (nsq a)
-    ;        (define x (+ a 1))
-    ;        (define y (- a 1))
-    ;        (if (= x 0)
-    ;            (+ x 100)
-    ;            (* x y)))))
-    ;(inspect (no-locals
-    ;    (quote
-    ;        (define (nsq a)
-    ;            (define x (+ a 1))
-    ;            (* x x)))))
+    (define func1 '(define (f) (define x 3) 1))
+    (define func2 '(define (nsq a)
+                       (define x (+ a 1))
+                       (define y (- a 1))
+                           (if (= x 0)
+                               (+ x 100)
+                               (* x y))))
+    (define func3 '(define (nsq a)
+                       (define x (+ a 1))
+                       (* x x)))
+    (define func4 '(define (nsq a)
+                       (define square (lambda (x) (lambda (y) (* x y))))
+                       ((square 5) 5)))
+    (define func5 '(define (nsq a)))
+    (define func6 '(define (nsq) (define square (lambda (x) (* x x)))))
+    (define func7 '(define (nsq a)
+                       (define square (lambda (x) (lambda (y) (* x y))))
+                       ((square 5) 5)))
 
-    (inspect (no-locals
-        '(define (nsq a)
-            (define square (lambda (x) (* x x)))))))
-
-    (define (nsq a)
-        (define square (lambda (x) (* x x)))
-            (square a))
-
-    (define (nsq2 a) ((lambda (square) (square 9)) (lambda (x) (* x x))))
-
-
-;(inspect (nsq 9))
-;(inspect (nsq2 9))
-(run4)
+    (exprTest (= ((eval func1 this)) ((eval (no-locals func1) this))) #t)
+    (exprTest (= ((eval func2 this) 3) ((eval (no-locals func2) this) 3)) #t)
+    (exprTest (= ((eval func3 this) 69) ((eval (no-locals func3) this) 69)) #t)
+    (exprTest (= ((eval func3 this) 69) ((eval (no-locals func3) this) 68)) #f)
+    (exprTest (= ((eval func4 this) 69) ((eval (no-locals func4) this) 69)) #t)
+    (exprTest (equal? ((eval func5 this) 69) ((eval (no-locals func5) this) 69)) #t)
+    ;(exprTest (= (((eval func6 this)) 69) (((eval (no-locals func6) this)) 69)) #t)
+    (exprTest (= ((eval func7 this) 69) ((eval (no-locals func7) this) 69)) #t))
 
 
 ;===================================Task 5======================================
