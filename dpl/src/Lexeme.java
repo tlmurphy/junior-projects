@@ -1,17 +1,24 @@
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 
 /**
  * Lexeme Class
  */
 public class Lexeme implements Type {
 
+    private String strVal;
+    private int intVal;
+    private double realVal;
+    private char charVal;
+    private boolean boolVal;
+    private ArrayList arrayVal;
+
     private String type;
-    private String string;
-    private int integer;
-    private double real;
+    private Lexeme left = null;
+    private Lexeme right = null;
 
     /**
-     * Create a lexeme with just a type.
+     * Create a lexeme with just a type (keywords).
      * @param type Type of lexeme
      */
     public Lexeme(String type) {
@@ -21,31 +28,70 @@ public class Lexeme implements Type {
     /**
      * Create a String lexeme
      * @param type Type of lexeme
-     * @param string String value
+     * @param strVal String value
      */
-    public Lexeme(String type, String string) {
+    public Lexeme(String type, String strVal) {
         this.type = type;
-        this.string = string;
+        this.strVal = strVal;
     }
 
     /**
      * Create an Integer Number lexeme
      * @param type Type of lexeme
-     * @param integer Integer value
+     * @param intVal Integer value
      */
-    public Lexeme(String type, int integer) {
+    public Lexeme(String type, int intVal) {
         this.type = type;
-        this.integer = integer;
+        this.intVal = intVal;
     }
 
     /**
      * Create a Real Number Lexeme
      * @param type Type of lexeme
-     * @param real Real value
+     * @param realVal Real value
      */
-    public Lexeme(String type, double real) {
+    public Lexeme(String type, double realVal) {
         this.type = type;
-        this.real = real;
+        this.realVal = realVal;
+    }
+
+    /**
+     * Create a Boolean Lexeme
+     * @param type Type of Lexeme
+     * @param boolVal Boolean Value (true or false)
+     */
+    public Lexeme(String type, boolean boolVal) {
+        this.type = type;
+        this.boolVal = boolVal;
+    }
+
+    /**
+     * Create an Array Lexeme
+     * @param type Type of Lexeme
+     * @param arrayVal Array Value
+     */
+    public Lexeme(String type, ArrayList arrayVal) {
+        this.type = type;
+        this.arrayVal = arrayVal;
+    }
+
+    @Override
+    public String toString() {
+        String returnString = this.type + ": ";
+        switch (this.type) {
+            case "STRING":
+                return returnString + this.strVal;
+            case "INTEGER":
+                return returnString + this.intVal;
+            case "REAL":
+                return returnString + this.realVal;
+            case "BOOLEAN":
+                return returnString + this.boolVal;
+            case "ARRAY":
+                return returnString + this.arrayVal;
+            default:
+                return this.type;
+        }
     }
 }
 

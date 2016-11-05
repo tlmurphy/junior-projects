@@ -166,9 +166,10 @@
     (exprTest (= ((eval func3 this) 69) ((eval (no-locals func3) this) 68)) #f)
     (exprTest (= ((eval func4 this) 69) ((eval (no-locals func4) this) 69)) #t)
     (exprTest (equal? ((eval func5 this) 69) ((eval (no-locals func5) this) 69)) #t)
-    ;(exprTest (= (((eval func6 this)) 69) (((eval (no-locals func6) this)) 69)) #t)
+    (exprTest (= (((eval func6 this)) 69) (((eval (no-locals func6) this)) 69)) #t)
     (exprTest (= ((eval func7 this) 69) ((eval (no-locals func7) this) 69)) #t))
 
+(run4)
 
 ;===================================Task 5======================================
 

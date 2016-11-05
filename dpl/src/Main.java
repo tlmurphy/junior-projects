@@ -1,6 +1,7 @@
 public class Main {
 
     public static void main(String[] args) {
-	    new Lexeme("SEMICOLAN")
+        System.out.println(args[0]);
+        new Scanner(args[0]);
     }
 }
