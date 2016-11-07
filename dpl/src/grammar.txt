@@ -1,0 +1,28 @@
+statements : statement
+           | statement statements
+
+statement : expression SEMICOLON
+          | ifStatement
+          | whileLoop
+
+block : OBRACE statements CBRACE
+
+varDef : LET VARIABLE ASSIGN expression SEMICOLON
+
+functionDef : FUNCTION VARIABLE OPAREN parameterList CPAREN block
+
+ifStatement : IF OPAREN expression CPAREN block optElse
+optElse : ELSE block
+        | ELSE ifStatemtent
+        | *empty*
+
+
+
+expression : unary operator expression
+           | unary
+
+operator : PLUS
+         | TIMES
+
+unary : NUMBER
+      | VARIABLE

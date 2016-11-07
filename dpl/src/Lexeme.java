@@ -12,10 +12,11 @@ public class Lexeme implements Type {
     private char charVal;
     private boolean boolVal;
     private ArrayList arrayVal;
+    private String varVal;
 
-    private String type;
-    private Lexeme left = null;
-    private Lexeme right = null;
+    public String type;
+    public Lexeme left = null;
+    public Lexeme right = null;
 
     /**
      * Create a lexeme with just a type (keywords).
@@ -26,13 +27,14 @@ public class Lexeme implements Type {
     }
 
     /**
-     * Create a String lexeme
+     * Create a Variable or String lexeme
      * @param type Type of lexeme
-     * @param strVal String value
+     * @param varOrStringVal Variable or String value
      */
-    public Lexeme(String type, String strVal) {
+    public Lexeme(String type, String varOrStringVal) {
         this.type = type;
-        this.strVal = strVal;
+        if (varOrStringVal.startsWith("\"")) this.strVal = varOrStringVal;
+        else this.varVal = varOrStringVal;
     }
 
     /**
@@ -89,8 +91,10 @@ public class Lexeme implements Type {
                 return returnString + this.boolVal;
             case "ARRAY":
                 return returnString + this.arrayVal;
+            case "VARIABLE":
+                return returnString + this.varVal;
             default:
-                return this.type;
+                return this.type.toUpperCase();
         }
     }
 }
