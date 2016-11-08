@@ -1,8 +1,13 @@
 let alpha = 77;
-
-func newFunction(alpha) {
-    if (alpha == 77) {
-        print("hello")
-    }
-    return 33.890067;
-}
+let beta = 4 + 5;
+let gamma = alpha;
+let varFunc = func newFunction(alpha) {
+                  if (alpha == 77) {
+                      print("hello")
+                  } else if (alpha >= 33) {
+                      print("bye");
+                  }
+                  return 33.890067;
+              }
+let beta = beta++;
+print(alpha);

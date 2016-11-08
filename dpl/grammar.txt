@@ -1,28 +1,43 @@
+unary : INTEGER
+      | STRING
+      | BOOLEAN
+      | VARIABLE
+
+operator : PLUS
+         | MINUS
+         | TIMES
+         | DIVIDE
+         | GREATER
+         | LESS
+
+greaterEqual: GREATER EQUAL
+
 statements : statement
            | statement statements
 
-statement : expression SEMICOLON
+statement : expression SEMI
           | ifStatement
           | whileLoop
 
 block : OBRACE statements CBRACE
 
-varDef : LET VARIABLE ASSIGN expression SEMICOLON
+varDef : LET VARIABLE ASSIGN expression SEMI
+       | LET VARIABLE ASSIGN functionDef SEMI
 
-functionDef : FUNCTION VARIABLE OPAREN parameterList CPAREN block
+functionDef : FUNCTION VARIABLE OPAREN optParameterList CPAREN block
+optParameterList : parameterList
+                 | *empty*
+parameterList : VARIABLE
+              | VARIABLE COMMA parameterList
 
 ifStatement : IF OPAREN expression CPAREN block optElse
 optElse : ELSE block
         | ELSE ifStatemtent
         | *empty*
 
-
-
 expression : unary operator expression
            | unary
 
-operator : PLUS
-         | TIMES
 
-unary : NUMBER
-      | VARIABLE
+
+

@@ -1,4 +1,4 @@
-import java.io.BufferedReader;
+import java.io.PushbackReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 
@@ -8,9 +8,9 @@ public class Parser {
     private Lexer lexer;
 
     public Parser(String fileName) {
-        BufferedReader br = null;
+        PushbackReader br = null;
         try {
-            br = new BufferedReader(new FileReader(fileName));
+            br = new PushbackReader(new FileReader(fileName));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -20,7 +20,9 @@ public class Parser {
     public void parse() {
         advance();
         while (!check("END")) {
-            System.out.println(lexeme.toString());
+            if (check("LET")) {
+                varDef();
+            }
             advance();
         }
     }
@@ -31,6 +33,7 @@ public class Parser {
 
     private Lexeme advance() {
         lexeme = lexer.lex();
+        System.out.println(lexeme.toString());
         return lexeme;
     }
 
@@ -41,41 +44,86 @@ public class Parser {
 
     private void matchNoAdvance(String type) {
         if (!check(type)) {
-            System.err.println("SYNTAX ERROR!");
+            System.out.println("SYNTAX ERROR!");
+            System.exit(-1);
         }
-    }
-
-
-    // Example parse
-    private void expression() {
-        unary();
-        if (operatorPending()) {
-            //operator();
-            expression();
-        }
-    }
-
-    private boolean operatorPending() {
-        return check("PLUS") || check("TIMES");
     }
 
     private void unary() {
         if (check("INTEGER")) {
             match("INTEGER");
-        } else if (check("REAL")) {
-            match("REAL");
-        } else if (check("VARIABLE")) {
+        } else if (check("STRING")) {
+            match("STRING");
+        } else if (check("BOOLEAN")) {
+            match("BOOLEAN");
+        } else { // Must be a variable
             match("VARIABLE");
-            if (check("OPAREN")) {
-                match("OPAREN");
-                // optExpressionList();
-                match("CPAREN");
-            }
-        } else {
-            match("OPAREN");
-            expression();
-            match("CPAREN");
         }
+    }
+
+    private boolean unaryPending() {
+        return  check("INTEGER") ||
+                check("STRING") ||
+                check("VARIABLE");
+    }
+
+    private void operator() {
+        advance();
+    }
+
+    private boolean operatorPending() {
+        return  check("PLUS") ||
+                check("MINUS") ||
+                check("MULT") ||
+                check("DIVIDE") ||
+                check("EQUAL") ||
+                check("GREATER") ||
+                check("GEQUAL") ||
+                check("LESS") ||
+                check("LEQUAL");
+    }
+
+    private boolean otherOperPending() {
+        return  check("INC") ||
+                check("DEC");
+    }
+
+
+    private void expression() {
+        unary();
+        if (operatorPending()) {
+            operator();
+            expression();
+        } else if (otherOperPending()) {
+            operator();
+        }
+    }
+
+    private boolean expressionPending() {
+        return unaryPending();
+    }
+
+    private void functionDef() {
+        if (check("VARIABLE")) {
+            match("VARIABLE");
+            // Match the parentheses and the optional parameter list
+        }
+    }
+
+    private boolean functionPending() {
+        return check("FUNCTION");
+    }
+
+    private void varDef() {
+        match("LET");
+        match("VARIABLE");
+        match("ASSIGN");
+        if (functionPending()) {
+            functionDef();
+        } else { // expression
+            expression();
+        }
+        match("SEMI");
     }
 
     private Lexeme unaryTree() {

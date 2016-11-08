@@ -1,13 +1,13 @@
-import java.io.BufferedReader;
+import java.io.PushbackReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 
 public class murphScanner {
 
     public murphScanner(String fileName) {
-        BufferedReader br = null;
+        PushbackReader br = null;
         try {
-            br = new BufferedReader(new FileReader(fileName));
+            br = new PushbackReader(new FileReader(fileName));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }

@@ -1,11 +1,11 @@
-import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.PushbackReader;
 
 public class Lexer {
 
-    private BufferedReader reader;
+    private PushbackReader reader;
 
-    public Lexer(BufferedReader reader) {
+    public Lexer(PushbackReader reader) {
         this.reader = reader;
     }
 
@@ -26,23 +26,23 @@ public class Lexer {
                 case ',':
                     return new Lexeme("COMMA");
                 case '+':
-                    return new Lexeme("PLUS");
+                    return lexOperator(readOperator(ch));
                 case '*':
-                    return new Lexeme("MULT");
+                    return lexOperator(readOperator(ch));
                 case '-':
-                    return new Lexeme("MINUS");
+                    return lexOperator(readOperator(ch));
                 case '/':
-                    return new Lexeme("DIVIDES");
+                    return lexOperator(readOperator(ch));
                 case '<':
-                    return new Lexeme("LESS");
+                    return lexOperator(readOperator(ch));
                 case '>':
-                    return new Lexeme("GREATER");
+                    return lexOperator(readOperator(ch));
+                case '=':
+                    return lexOperator(readOperator(ch));
                 case '{':
                     return new Lexeme("OBRACK");
                 case '}':
                     return new Lexeme("CBRACK");
-                case '=':
-                    return new Lexeme("ASSIGN");
                 case ';':
                     return new Lexeme("SEMI");
                 default:
@@ -65,12 +65,26 @@ public class Lexer {
         } else return r;
     }
 
+    private String readOperator(char ch) throws IOException {
+        String operString = "";
+        operString += ch;
+        char newCh = (char) reader.read();
+        if (newCh == ch || newCh == '=') {
+            operString += newCh;
+            return operString;
+        } else {
+            reader.unread(newCh);
+            return operString;
+        }
+    }
+
     private String readMoreNum(char ch) throws IOException {
         String numString = "";
         while (Character.isDigit(ch) || ch == '.') {
             numString += ch;
             ch = (char) reader.read();
         }
+        reader.unread(ch);
         return numString;
     }
 
@@ -80,6 +94,7 @@ public class Lexer {
             keyString += ch;
             ch = (char) reader.read();
         }
+        reader.unread(ch);
         return keyString;
     }
 
@@ -97,6 +112,25 @@ public class Lexer {
         return newString;
     }
 
+    private Lexeme lexOperator(String oper) {
+        switch (oper) {
+            case "=": return new Lexeme("ASSIGN");
+            case "==": return new Lexeme("EQUAL");
+            case "+": return new Lexeme("PLUS");
+            case "++": return new Lexeme("INC");
+            case "-": return new Lexeme("MINUS");
+            case "--": return new Lexeme("DEC");
+            case "*": return new Lexeme("MULT");
+            case "/": return new Lexeme("DIVIDE");
+            case ">": return new Lexeme("GREATER");
+            case ">=": return new Lexeme("GEQUAL");
+            case "<": return new Lexeme("LESS");
+            case "<=": return new Lexeme("LEQUAL");
+            default:
+                return new Lexeme("BAD_CHARACTER");
+        }
+    }
+
     private Lexeme lexNumber(String num) {
         if (num.indexOf('.') >= 0) return new Lexeme("REAL", Double.parseDouble(num));
         else return new Lexeme("INTEGER", Integer.parseInt(num));
@@ -112,6 +146,10 @@ public class Lexer {
                 return new Lexeme("IF");
             case "else":
                 return new Lexeme("ELSE");
+            case "true":
+                return new Lexeme("TRUE");
+            case "false":
+                return new Lexeme("FALSE");
             case "print":
                 return new Lexeme("PRINT");
             case "return":

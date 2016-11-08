@@ -8,8 +8,6 @@ public class Lexeme implements Type {
 
     private String strVal;
     private int intVal;
-    private double realVal;
-    private char charVal;
     private boolean boolVal;
     private ArrayList arrayVal;
     private String varVal;
@@ -48,16 +46,6 @@ public class Lexeme implements Type {
     }
 
     /**
-     * Create a Real Number Lexeme
-     * @param type Type of lexeme
-     * @param realVal Real value
-     */
-    public Lexeme(String type, double realVal) {
-        this.type = type;
-        this.realVal = realVal;
-    }
-
-    /**
      * Create a Boolean Lexeme
      * @param type Type of Lexeme
      * @param boolVal Boolean Value (true or false)
@@ -85,8 +73,6 @@ public class Lexeme implements Type {
                 return returnString + this.strVal;
             case "INTEGER":
                 return returnString + this.intVal;
-            case "REAL":
-                return returnString + this.realVal;
             case "BOOLEAN":
                 return returnString + this.boolVal;
             case "ARRAY":
