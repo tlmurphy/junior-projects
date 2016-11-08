@@ -1,10 +1,9 @@
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 
 /**
  * Lexeme Class
  */
-public class Lexeme implements Type {
+public class Lexeme {
 
     private String strVal;
     private int intVal;
@@ -63,6 +62,18 @@ public class Lexeme implements Type {
     public Lexeme(String type, ArrayList arrayVal) {
         this.type = type;
         this.arrayVal = arrayVal;
+    }
+
+    /**
+     * Create an Environment Lexeme
+     * @param type Type of Lexeme
+     * @param left Car value
+     * @param right Cdr Value
+     */
+    public Lexeme(String type, Lexeme left, Lexeme right) {
+        this.type = type;
+        this.left = left;
+        this.right = right;
     }
 
     @Override

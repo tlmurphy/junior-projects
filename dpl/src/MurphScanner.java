@@ -2,9 +2,9 @@ import java.io.PushbackReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 
-public class murphScanner {
+public class MurphScanner {
 
-    public murphScanner(String fileName) {
+    public MurphScanner(String fileName) {
         PushbackReader br = null;
         try {
             br = new PushbackReader(new FileReader(fileName));
