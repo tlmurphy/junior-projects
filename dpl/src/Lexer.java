@@ -80,7 +80,7 @@ public class Lexer {
 
     private String readMoreNum(char ch) throws IOException {
         String numString = "";
-        while (Character.isDigit(ch) || ch == '.') {
+        while (Character.isDigit(ch)) {
             numString += ch;
             ch = (char) reader.read();
         }
@@ -132,8 +132,7 @@ public class Lexer {
     }
 
     private Lexeme lexNumber(String num) {
-        if (num.indexOf('.') >= 0) return new Lexeme("REAL", Double.parseDouble(num));
-        else return new Lexeme("INTEGER", Integer.parseInt(num));
+        return new Lexeme("INTEGER", Integer.parseInt(num));
     }
 
     private Lexeme lexKeyword(String key) {

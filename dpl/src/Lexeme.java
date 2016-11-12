@@ -6,14 +6,14 @@ import java.util.ArrayList;
 public class Lexeme {
 
     private String strVal;
-    private int intVal;
+    int intVal;
     private boolean boolVal;
     private ArrayList arrayVal;
     private String varVal;
 
-    public String type;
-    public Lexeme left = null;
-    public Lexeme right = null;
+    String type;
+    Lexeme left = null;
+    Lexeme right = null;
 
     /**
      * Create a lexeme with just a type (keywords).
