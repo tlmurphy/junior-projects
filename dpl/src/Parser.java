@@ -17,14 +17,15 @@ public class Parser {
         lexer = new Lexer(br);
     }
 
-    public void parse() {
+    public Lexeme parse() {
         advance();
         while (!check("END")) {
             if (check("LET")) {
-                varDef();
+                return varDefTree();
             }
             advance();
         }
+        return null;
     }
 
     private boolean check(String type) {
@@ -32,9 +33,9 @@ public class Parser {
     }
 
     private Lexeme advance() {
+        Lexeme prevLexeme = lexeme;
         lexeme = lexer.lex();
-        System.out.println(lexeme.toString());
-        return lexeme;
+        return prevLexeme;
     }
 
     private Lexeme match(String type) {
@@ -44,9 +45,18 @@ public class Parser {
 
     private void matchNoAdvance(String type) {
         if (!check(type)) {
-            System.out.println("SYNTAX ERROR!");
+            System.out.println("SYNTAX ERROR: Line " + lexer.lineNumber);
             System.exit(-1);
         }
+    }
+
+    private Lexeme statements() {
+        Lexeme tree = new Lexeme("statements");
+//        if (statementPending()) {
+//            tree.left = statement();
+//            tree.right = statements();
+//        }
+        return tree;
     }
 
     private void unary() {
@@ -61,14 +71,28 @@ public class Parser {
         }
     }
 
+    private Lexeme unaryTree() {
+        Lexeme tree;
+        if (check("INTEGER")) {
+            tree = match("INTEGER");
+        } else if (check("STRING")) {
+            tree = match("STRING");
+        } else if (check("BOOLEAN")) {
+            tree = match("BOOLEAN");
+        } else { // Must be a variable
+            tree = match("VARIABLE");
+        }
+        return tree;
+    }
+
     private boolean unaryPending() {
         return  check("INTEGER") ||
                 check("STRING") ||
                 check("VARIABLE");
     }
 
-    private void operator() {
-        advance();
+    private Lexeme operator() {
+        return advance();
     }
 
     private boolean operatorPending() {
@@ -99,15 +123,27 @@ public class Parser {
         }
     }
 
+    private Lexeme expressTree() {
+        Lexeme tree = unaryTree();
+        if (operatorPending()) {
+            Lexeme temp = operator();
+            temp.left = tree;
+            temp.right = expressTree();
+            tree = temp;
+        }
+        return tree;
+    }
+
     private boolean expressionPending() {
         return unaryPending();
     }
 
-    private void functionDef() {
+    private Lexeme functionDef() {
         if (check("VARIABLE")) {
             match("VARIABLE");
             // Match the parentheses and the optional parameter list
         }
+        return null;
     }
 
     private boolean functionPending() {
@@ -126,22 +162,15 @@ public class Parser {
         match("SEMI");
     }
 
-    private Lexeme unaryTree() {
-        Lexeme tree;
-
-        if (check("VARIABLE")) tree = advance();
-        else if (check("INTEGER")) tree = advance();
-//        else if (check("OPAREN")) {
-//            tree = match("OPAREN");
-//            tree.left = null;
-//            tree.right = expression();
-//        }
-        else {
-            match("MINUS");
-            tree = new Lexeme("UMINUS");
-            tree.left = null;
-            tree.right = unaryTree();
+    private Lexeme varDefTree() {
+        Lexeme tree = new Lexeme("LET");
+        tree.left = match("VARIABLE");
+        if (functionPending()) {
+            tree.right = functionDef();
+        } else {
+            tree.right = expressTree();
         }
+        match("SEMI");
         return tree;
     }
 }

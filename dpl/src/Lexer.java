@@ -4,9 +4,11 @@ import java.io.PushbackReader;
 public class Lexer {
 
     private PushbackReader reader;
+    public int lineNumber;
 
     public Lexer(PushbackReader reader) {
         this.reader = reader;
+        lineNumber = 1;
     }
 
     public Lexeme lex() {
@@ -60,7 +62,10 @@ public class Lexer {
     }
 
     private int skipWhiteSpace(int r) throws IOException {
-        if (r == 32 || r == 10) {
+        if (r == 32) {
+            return skipWhiteSpace(reader.read());
+        } else if (r == 10) {
+            lineNumber += 1;
             return skipWhiteSpace(reader.read());
         } else return r;
     }

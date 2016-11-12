@@ -1,7 +1,12 @@
 
 public class Evaluator {
 
-    private Environment e = new Environment();
+    private Environment e;
+
+    public Evaluator(Environment e) {
+        this.e = e;
+    }
+
     public Lexeme eval(Lexeme tree, Lexeme env) {
         switch (tree.type) {
             case "INTEGER": return tree;
@@ -16,7 +21,7 @@ public class Evaluator {
             case "AND": return evalAnd(tree, env);
             case "OR": return evalOr(tree, env);
             case "ASSIGN": return evalAssign(tree, env);
-            case "LET": return evalVarDef(tree, env);
+            case "LET": evalVarDef(tree, env);
             case "FUNCTION": return evalFuncDef(tree, env);
             case "IF": return evalIf(tree, env);
             case "WHILE": return evalWhile(tree, env);
@@ -27,6 +32,30 @@ public class Evaluator {
                 System.exit(-1);
                 return null;
         }
+    }
+
+    private Lexeme evalOr(Lexeme tree, Lexeme env) {
+        return null;
+    }
+
+    private Lexeme evalAnd(Lexeme tree, Lexeme env) {
+        return null;
+    }
+
+    private Lexeme evalGreater(Lexeme tree, Lexeme env) {
+        return null;
+    }
+
+    private Lexeme evalDivide(Lexeme tree, Lexeme env) {
+        return null;
+    }
+
+    private Lexeme evalMult(Lexeme tree, Lexeme env) {
+        return null;
+    }
+
+    private Lexeme evalMinus(Lexeme tree, Lexeme env) {
+        return null;
     }
 
     private Lexeme evalPlus(Lexeme tree, Lexeme env) {
@@ -63,7 +92,8 @@ public class Evaluator {
         return null;
     }
 
-    private Lexeme evalVarDef(Lexeme tree, Lexeme env) {
-        return null;
+    private void evalVarDef(Lexeme tree, Lexeme env) {
+        Lexeme val = eval(tree.right, env);
+        e.insert(tree.left, val, env);
     }
 }

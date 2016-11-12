@@ -18,6 +18,11 @@ statements : statement
 statement : expression SEMI
           | ifStatement
           | whileLoop
+          | functionDef
+          | functionCall SEMI
+          | varDef
+          | varAssign
+
 
 block : OBRACE statements CBRACE
 
