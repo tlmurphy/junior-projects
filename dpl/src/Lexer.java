@@ -21,6 +21,10 @@ public class Lexer {
 
             ch = (char) r;
             switch (ch) {
+                case '#':
+                    return skipComment(r);
+                case '^':
+                   return skipLongComment();
                 case '(':
                     return new Lexeme("OPAREN");
                 case ')':
@@ -59,6 +63,21 @@ public class Lexer {
         }
         catch (IOException e) { e.printStackTrace(); }
         return new Lexeme("BAD_CHARACTER");
+    }
+
+    public Lexeme skipComment(int r) throws IOException {
+        while (r != 10) { // Read until end of line
+            r = reader.read();
+        }
+        return new Lexeme("COMMENT");
+    }
+
+    private Lexeme skipLongComment() throws IOException {
+        char ch = (char) reader.read();
+        while (ch != '^') {
+            ch = (char) reader.read();
+        }
+        return new Lexeme("COMMENT");
     }
 
     private int skipWhiteSpace(int r) throws IOException {

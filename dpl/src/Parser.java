@@ -19,13 +19,57 @@ public class Parser {
 
     public Lexeme parse() {
         advance();
-        while (!check("END")) {
-            if (check("LET")) {
-                return varDefTree();
-            }
-            advance();
+        Lexeme tree = statements();
+        return tree;
+    }
+
+    private boolean varDefPending() {
+        return check("LET");
+    }
+
+    private boolean printPending() {
+        return check("PRINT");
+    }
+
+    public boolean statementPending() {
+        return  expressionPending() ||
+                varDefPending() ||
+                printPending() ||
+                check("COMMENT");
+    }
+
+    private Lexeme statement() {
+        Lexeme tree = new Lexeme("STATEMENT");
+        if (check("COMMENT")) {
+            tree.left = match("COMMENT");
         }
-        return null;
+        if (expressionPending()) {
+            tree.left = expressTree();
+        } else if (varDefPending()) {
+            tree.left = varDefTree();
+        } else if (printPending()) {
+            tree.left = printLnTree();
+        }
+        return tree;
+    }
+
+    private Lexeme statements() {
+        Lexeme tree = new Lexeme("STATEMENTS");
+        if (statementPending()) {
+            tree.left = statement();
+            tree.right = statements();
+        }
+
+        return tree;
+    }
+
+    private Lexeme printLnTree() {
+        Lexeme tree = match("PRINT");
+        match("OPAREN");
+        tree.right = expressTree();
+        match("CPAREN");
+        match("SEMI");
+        return tree;
     }
 
     private boolean check(String type) {
@@ -48,15 +92,6 @@ public class Parser {
             System.out.println("SYNTAX ERROR: Line " + lexer.lineNumber);
             System.exit(-1);
         }
-    }
-
-    private Lexeme statements() {
-        Lexeme tree = new Lexeme("statements");
-//        if (statementPending()) {
-//            tree.left = statement();
-//            tree.right = statements();
-//        }
-        return tree;
     }
 
     private void unary() {
@@ -163,8 +198,9 @@ public class Parser {
     }
 
     private Lexeme varDefTree() {
-        Lexeme tree = new Lexeme("LET");
+        Lexeme tree = match("LET");
         tree.left = match("VARIABLE");
+        match("ASSIGN");
         if (functionPending()) {
             tree.right = functionDef();
         } else {

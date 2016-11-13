@@ -83,7 +83,7 @@ public class Lexeme {
             case "STRING":
                 return returnString + this.strVal;
             case "INTEGER":
-                return returnString + this.intVal;
+                return Integer.toString(this.intVal);
             case "BOOLEAN":
                 return returnString + this.boolVal;
             case "ARRAY":

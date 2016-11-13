@@ -9,6 +9,9 @@ public class Evaluator {
 
     public Lexeme eval(Lexeme tree, Lexeme env) {
         switch (tree.type) {
+            case "STATEMENTS": return eval(tree.left, env);
+            case "STATEMENT": return eval(tree.left, env);
+            case "COMMENT": return null;
             case "INTEGER": return tree;
             case "STRING": return tree;
             case "VARIABLE": return e.lookupEnv(tree, env);
@@ -27,11 +30,35 @@ public class Evaluator {
             case "WHILE": return evalWhile(tree, env);
             case "FUNC_CALL": return evalFuncCall(tree, env);
             case "BLOCK": return evalBlock(tree, env);
+            case "PRINT": return evalPrintln(tree, env);
             default:
                 System.out.println("BAD EXPRESSION!");
                 System.exit(-1);
                 return null;
         }
+    }
+
+    private Lexeme evalFuncCall(Lexeme tree, Lexeme env) {
+//        String name = getCallName(tree);
+//        Lexeme args = getFuncCallArgs(tree);
+//        Lexeme eargs = evalArgs(args,env);
+//        // Checking for built in functions
+//        switch (name) {
+//            case "println": return evalPrintln(eargs);
+//        }
+//        Lexeme params = getClosureParams(closure);
+//        Lexeme body = getClosureBody(closure);
+//        Lexeme senv = getClosureEnvironment(closure);
+//        Lexeme xenv = EnvExtend(senv,params,eargs);
+//
+//        return eval(body,xenv);
+        return null;
+    }
+
+    private Lexeme evalPrintln(Lexeme tree, Lexeme env) {
+        Lexeme varValue = e.lookupEnv(env, tree.right);
+        System.out.println(varValue);
+        return null;
     }
 
     private Lexeme evalOr(Lexeme tree, Lexeme env) {
@@ -76,10 +103,6 @@ public class Evaluator {
         return null;
     }
 
-    private Lexeme evalFuncCall(Lexeme tree, Lexeme env) {
-        return null;
-    }
-
     private Lexeme evalWhile(Lexeme tree, Lexeme env) {
         return null;
     }
@@ -95,5 +118,11 @@ public class Evaluator {
     private void evalVarDef(Lexeme tree, Lexeme env) {
         Lexeme val = eval(tree.right, env);
         e.insert(tree.left, val, env);
+//        System.out.println(env);
+//        System.out.println(env.left);
+//        System.out.println(env.right);
+//        System.out.println(env.left.left);
+//        System.out.println(env.left.left.left);
+//        System.out.println(env.left.left.right);
     }
 }

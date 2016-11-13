@@ -6,6 +6,10 @@ public class Main {
         Environment env = new Environment();
         Evaluator e = new Evaluator(env);
         Lexeme global = env.createEnv();
-        e.eval(parseTree, global);
+        Lexeme iter = parseTree;
+        while (iter.right != null) {
+            e.eval(iter, global);
+            iter = iter.right;
+        }
     }
 }
