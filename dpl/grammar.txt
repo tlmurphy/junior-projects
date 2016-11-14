@@ -15,13 +15,15 @@ greaterEqual: GREATER EQUAL
 statements : statement
            | statement statements
 
-statement : expression SEMI
-          | ifStatement
+statement : ifStatement
           | whileLoop
           | functionDef
-          | functionCall SEMI
+          | functionCall
           | varDef
           | varAssign
+          | print
+
+print : PRINT OPAREN expression CPAREN SEMI
 
 
 block : OBRACE statements CBRACE

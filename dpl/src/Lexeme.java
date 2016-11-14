@@ -7,7 +7,7 @@ public class Lexeme {
 
     private String strVal;
     int intVal;
-    private boolean boolVal;
+    boolean boolVal;
     private ArrayList arrayVal;
     private String varVal;
 
@@ -81,11 +81,12 @@ public class Lexeme {
         String returnString = this.type + ": ";
         switch (this.type) {
             case "STRING":
-                return returnString + this.strVal;
+                return this.strVal.replace("\"", "");
             case "INTEGER":
                 return Integer.toString(this.intVal);
             case "BOOLEAN":
-                return returnString + this.boolVal;
+                if (this.boolVal) return "true";
+                else return "false";
             case "ARRAY":
                 return returnString + this.arrayVal;
             case "VARIABLE":

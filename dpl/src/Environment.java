@@ -37,7 +37,7 @@ public class Environment {
         return var1.toString().equals(var2.toString());
     }
 
-    public Lexeme lookupEnv(Lexeme env, Lexeme variable) {
+    public Lexeme lookupEnv(Lexeme variable, Lexeme env) {
         while (env != null) {
             Lexeme table = car(env);
             Lexeme vars = car(table);

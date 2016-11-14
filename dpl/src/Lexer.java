@@ -32,18 +32,14 @@ public class Lexer {
                 case ',':
                     return new Lexeme("COMMA");
                 case '+':
-                    return lexOperator(readOperator(ch));
                 case '*':
-                    return lexOperator(readOperator(ch));
                 case '-':
-                    return lexOperator(readOperator(ch));
                 case '/':
-                    return lexOperator(readOperator(ch));
                 case '<':
-                    return lexOperator(readOperator(ch));
                 case '>':
-                    return lexOperator(readOperator(ch));
                 case '=':
+                case '&':
+                case '|':
                     return lexOperator(readOperator(ch));
                 case '{':
                     return new Lexeme("OBRACK");
@@ -73,9 +69,15 @@ public class Lexer {
     }
 
     private Lexeme skipLongComment() throws IOException {
-        char ch = (char) reader.read();
+        int r = reader.read();
+        char ch = (char) r;
         while (ch != '^') {
-            ch = (char) reader.read();
+            if (r == -1) {
+                System.out.println("YOU'RE MISSING THE ENDING ^ FOR YOUR BLOCK COMMENT ON LINE " + lineNumber);
+                System.exit(-1);
+            }
+            r = reader.read();
+            ch = (char) r;
         }
         return new Lexeme("COMMENT");
     }
@@ -125,11 +127,17 @@ public class Lexer {
     private String readMoreString(char ch) throws IOException {
         String newString = "";
         newString += ch;
-        ch = (char) reader.read();
+        int r = reader.read();
+        ch = (char) r;
 
         while (ch != '\"') {
+            if (r == -1) {
+                System.out.println("YOU'RE MISSING AN END QUOTE ON LINE " + lineNumber);
+                System.exit(-1);
+            }
             newString += ch;
-            ch = (char) reader.read();
+            r = reader.read();
+            ch = (char) r;
         }
 
         newString += ch; // Needed to add the ending quote on
@@ -141,15 +149,15 @@ public class Lexer {
             case "=": return new Lexeme("ASSIGN");
             case "==": return new Lexeme("EQUAL");
             case "+": return new Lexeme("PLUS");
-            case "++": return new Lexeme("INC");
             case "-": return new Lexeme("MINUS");
-            case "--": return new Lexeme("DEC");
             case "*": return new Lexeme("MULT");
             case "/": return new Lexeme("DIVIDE");
             case ">": return new Lexeme("GREATER");
             case ">=": return new Lexeme("GEQUAL");
             case "<": return new Lexeme("LESS");
             case "<=": return new Lexeme("LEQUAL");
+            case "&&": return new Lexeme("AND");
+            case "||": return new Lexeme("OR");
             default:
                 return new Lexeme("BAD_CHARACTER");
         }

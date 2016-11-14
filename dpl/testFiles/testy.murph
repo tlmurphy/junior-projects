@@ -9,5 +9,4 @@ let varFunc = func newFunction(alpha) {
                   }
                   return 33.890067;
               }
-let beta = beta++;
 print(alpha);

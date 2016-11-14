@@ -23,55 +23,6 @@ public class Parser {
         return tree;
     }
 
-    private boolean varDefPending() {
-        return check("LET");
-    }
-
-    private boolean printPending() {
-        return check("PRINT");
-    }
-
-    public boolean statementPending() {
-        return  expressionPending() ||
-                varDefPending() ||
-                printPending() ||
-                check("COMMENT");
-    }
-
-    private Lexeme statement() {
-        Lexeme tree = new Lexeme("STATEMENT");
-        if (check("COMMENT")) {
-            tree.left = match("COMMENT");
-        }
-        if (expressionPending()) {
-            tree.left = expressTree();
-        } else if (varDefPending()) {
-            tree.left = varDefTree();
-        } else if (printPending()) {
-            tree.left = printLnTree();
-        }
-        return tree;
-    }
-
-    private Lexeme statements() {
-        Lexeme tree = new Lexeme("STATEMENTS");
-        if (statementPending()) {
-            tree.left = statement();
-            tree.right = statements();
-        }
-
-        return tree;
-    }
-
-    private Lexeme printLnTree() {
-        Lexeme tree = match("PRINT");
-        match("OPAREN");
-        tree.right = expressTree();
-        match("CPAREN");
-        match("SEMI");
-        return tree;
-    }
-
     private boolean check(String type) {
         return lexeme.type.equals(type);
     }
@@ -90,23 +41,75 @@ public class Parser {
     private void matchNoAdvance(String type) {
         if (!check(type)) {
             System.out.println("SYNTAX ERROR: Line " + lexer.lineNumber);
+            System.out.println("GOT " + type + "..." + "NEEDED " + lexeme.type);
             System.exit(-1);
         }
     }
 
-    private void unary() {
-        if (check("INTEGER")) {
-            match("INTEGER");
-        } else if (check("STRING")) {
-            match("STRING");
-        } else if (check("BOOLEAN")) {
-            match("BOOLEAN");
-        } else { // Must be a variable
-            match("VARIABLE");
-        }
+    private boolean varDefPending() {
+        return check("LET");
     }
 
-    private Lexeme unaryTree() {
+    private boolean printPending() {
+        return check("PRINT");
+    }
+
+    private boolean statementPending() {
+        return  expressionPending() ||
+                varDefPending() ||
+                printPending() ||
+                check("COMMENT") ||
+                ifPending();
+    }
+
+    private boolean ifPending() {
+        return check("IF");
+    }
+
+    private Lexeme ifStatement() {
+        Lexeme tree = match("IF");
+        match("OPAREN");
+        tree.left = expression();
+        match("CPAREN");
+        match("OBRACK");
+        tree.right = statements();
+        match("CBRACK");
+        return tree;
+    }
+
+    private Lexeme statement() {
+        Lexeme tree = new Lexeme("STATEMENT");
+        if (check("COMMENT")) {
+            tree.left = match("COMMENT");
+        } else if (varDefPending()) {
+            tree.left = varDef();
+        } else if (printPending()) {
+            tree.left = print();
+        } else if (ifPending()) {
+            tree.left = ifStatement();
+        }
+        return tree;
+    }
+
+    private Lexeme statements() {
+        Lexeme tree = new Lexeme("STATEMENTS");
+        if (statementPending()) {
+            tree.left = statement();
+            tree.right = statements();
+        }
+        return tree;
+    }
+
+    private Lexeme print() {
+        Lexeme tree = match("PRINT");
+        match("OPAREN");
+        tree.right = expression();
+        match("CPAREN");
+        match("SEMI");
+        return tree;
+    }
+
+    private Lexeme unary() {
         Lexeme tree;
         if (check("INTEGER")) {
             tree = match("INTEGER");
@@ -139,31 +142,17 @@ public class Parser {
                 check("GREATER") ||
                 check("GEQUAL") ||
                 check("LESS") ||
-                check("LEQUAL");
+                check("LEQUAL") ||
+                check("AND") ||
+                check("OR");
     }
 
-    private boolean otherOperPending() {
-        return  check("INC") ||
-                check("DEC");
-    }
-
-
-    private void expression() {
-        unary();
-        if (operatorPending()) {
-            operator();
-            expression();
-        } else if (otherOperPending()) {
-            operator();
-        }
-    }
-
-    private Lexeme expressTree() {
-        Lexeme tree = unaryTree();
-        if (operatorPending()) {
+    private Lexeme expression() {
+        Lexeme tree = unary();
+        while (operatorPending()) {
             Lexeme temp = operator();
             temp.left = tree;
-            temp.right = expressTree();
+            temp.right = unary();
             tree = temp;
         }
         return tree;
@@ -185,26 +174,14 @@ public class Parser {
         return check("FUNCTION");
     }
 
-    private void varDef() {
-        match("LET");
-        match("VARIABLE");
-        match("ASSIGN");
-        if (functionPending()) {
-            functionDef();
-        } else { // expression
-            expression();
-        }
-        match("SEMI");
-    }
-
-    private Lexeme varDefTree() {
+    private Lexeme varDef() {
         Lexeme tree = match("LET");
         tree.left = match("VARIABLE");
         match("ASSIGN");
         if (functionPending()) {
             tree.right = functionDef();
         } else {
-            tree.right = expressTree();
+            tree.right = expression();
         }
         match("SEMI");
         return tree;
