@@ -62,6 +62,17 @@ public class Parser {
                 ifPending();
     }
 
+    private boolean blockPending() {
+        return check("OBRACE");
+    }
+
+    private Lexeme block() {
+        match("OBRACE");
+        Lexeme tree = statements();
+        match("CBRACE");
+        return tree;
+    }
+
     private boolean ifPending() {
         return check("IF");
     }
@@ -69,11 +80,41 @@ public class Parser {
     private Lexeme ifStatement() {
         Lexeme tree = match("IF");
         match("OPAREN");
-        tree.left = expression();
+        tree.left = new Lexeme("GLUE");
+        tree.left.left = expression();
         match("CPAREN");
-        match("OBRACK");
-        tree.right = statements();
-        match("CBRACK");
+        tree.left.right = block();
+        if (elsePending()) {
+            tree.right = elseStatement();
+        }
+        return tree;
+    }
+
+    private boolean elsePending() {
+        return check("ELSE");
+    }
+
+    private Lexeme elseStatement() {
+        match("ELSE");
+        Lexeme tree;
+        if (ifPending()) {
+            tree = ifStatement();
+        } else {
+            tree = block();
+        }
+        return tree;
+    }
+
+    private boolean varAssignPending() {
+        return check("VARIABLE");
+    }
+
+    private Lexeme varAssign() {
+        Lexeme temp = match("VARIABLE");
+        Lexeme tree = match("ASSIGN");
+        tree.left = temp;
+        tree.right = expression();
+        match("SEMI");
         return tree;
     }
 
@@ -87,6 +128,8 @@ public class Parser {
             tree.left = print();
         } else if (ifPending()) {
             tree.left = ifStatement();
+        } else if (varAssignPending()) {
+            tree.left = varAssign();
         }
         return tree;
     }

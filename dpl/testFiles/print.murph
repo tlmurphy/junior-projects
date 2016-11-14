@@ -4,5 +4,5 @@ print(alpha);
 let beta = 32;
 print(beta);
 
-let gamma = "string";
+let gamma = "Trevor is cool!";
 print(gamma);

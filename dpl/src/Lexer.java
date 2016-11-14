@@ -17,7 +17,10 @@ public class Lexer {
 
             int r = reader.read();
             r = skipWhiteSpace(r);
-            if (r == -1) return new Lexeme("END");
+            if (r == -1) {
+                reader.close();
+                return new Lexeme("END");
+            }
 
             ch = (char) r;
             switch (ch) {
@@ -42,9 +45,9 @@ public class Lexer {
                 case '|':
                     return lexOperator(readOperator(ch));
                 case '{':
-                    return new Lexeme("OBRACK");
+                    return new Lexeme("OBRACE");
                 case '}':
-                    return new Lexeme("CBRACK");
+                    return new Lexeme("CBRACE");
                 case ';':
                     return new Lexeme("SEMI");
                 default:

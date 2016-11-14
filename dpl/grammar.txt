@@ -31,6 +31,9 @@ block : OBRACE statements CBRACE
 varDef : LET VARIABLE ASSIGN expression SEMI
        | LET VARIABLE ASSIGN functionDef SEMI
 
+varAssign : VARIABLE ASSIGN expression SEMI
+          | VARIABLE ASSIGN functionDef SEMI
+
 functionDef : FUNCTION VARIABLE OPAREN optParameterList CPAREN block
 optParameterList : parameterList
                  | *empty*

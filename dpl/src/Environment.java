@@ -13,12 +13,14 @@ public class Environment {
         return cell.right;
     }
 
-    public void setCar(Lexeme cell, Lexeme newVal) {
+    public Lexeme setCar(Lexeme cell, Lexeme newVal) {
         cell.left = newVal;
+        return cell;
     }
 
-    public void setCdr(Lexeme cell, Lexeme newVal) {
+    public Lexeme setCdr(Lexeme cell, Lexeme newVal) {
         cell.right = newVal;
+        return cell;
     }
 
     public Lexeme createEnv() {
@@ -45,6 +47,26 @@ public class Environment {
             while (vars != null) {
                 if (sameVar(variable, car(vars))) {
                     return car(vals);
+                }
+                vars = cdr(vars);
+                vals = cdr(vals);
+            }
+            env = cdr(env);
+        }
+
+        System.out.println("VARIABLE: " + variable + " is undefined :(");
+        System.exit(-1);
+        return null;
+    }
+
+    public Lexeme updateEnv(Lexeme variable, Lexeme newVal, Lexeme env) {
+        while (env != null) {
+            Lexeme table = car(env);
+            Lexeme vars = car(table);
+            Lexeme vals = cdr(table);
+            while (vars != null) {
+                if (sameVar(variable, car(vars))) {
+                    return setCar(vals, newVal);
                 }
                 vars = cdr(vars);
                 vals = cdr(vals);

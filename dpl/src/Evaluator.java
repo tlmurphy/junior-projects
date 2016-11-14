@@ -32,19 +32,18 @@ public class Evaluator {
             case "EQUAL": return evalOperator(tree, env);
             case "AND": return evalAnd(tree, env);
             case "OR": return evalOr(tree, env);
-            case "ASSIGN": return evalAssign(tree, env);
-            case "LET": evalVarDef(tree, env);
+            case "ASSIGN": return evalVarAssign(tree, env);
+            case "LET": return evalVarDef(tree, env);
             case "FUNCTION": return evalFuncDef(tree, env);
-            case "IF": evalIf(tree, env);
+            case "IF": return evalIf(tree, env);
             case "WHILE": return evalWhile(tree, env);
             case "FUNC_CALL": return evalFuncCall(tree, env);
-            case "BLOCK": return evalBlock(tree, env);
             case "PRINT": return evalPrint(tree.right, env);
             default:
                 System.out.println("BAD EXPRESSION!");
                 System.exit(-1);
-                return null;
         }
+        return null;
     }
 
     private Lexeme evalFuncCall(Lexeme tree, Lexeme env) {
@@ -97,15 +96,10 @@ public class Evaluator {
         return null;
     }
 
-    private Lexeme evalAssign(Lexeme tree, Lexeme env) {
-        Lexeme value = eval(tree.right, env);
-        // update
-        return value;
-    }
-
-    // Eval functions
-
-    private Lexeme evalBlock(Lexeme tree, Lexeme env) {
+    private Lexeme evalVarAssign(Lexeme tree, Lexeme env) {
+        Lexeme var = tree.left;
+        Lexeme val = tree.right;
+        e.updateEnv(var, val, env);
         return null;
     }
 
@@ -113,19 +107,26 @@ public class Evaluator {
         return null;
     }
 
-    private void evalIf(Lexeme tree, Lexeme env) {
+    private Lexeme evalIf(Lexeme tree, Lexeme env) {
+        Lexeme ifExpression = tree.left.left;
+        Lexeme ifBody = tree.left.right;
+        Lexeme elseStatement = tree.right;
         Lexeme local = e.extendEnv(env, e.getVars(env), e.getVals(env));
-        if (eval(tree.left, env).boolVal) {
-            eval(tree.right, local);
+        if (eval(ifExpression, env).boolVal) {
+            eval(ifBody, local);
+        } else {
+            eval(elseStatement, local);
         }
+        return null;
     }
 
     private Lexeme evalFuncDef(Lexeme tree, Lexeme env) {
         return null;
     }
 
-    private void evalVarDef(Lexeme tree, Lexeme env) {
+    private Lexeme evalVarDef(Lexeme tree, Lexeme env) {
         Lexeme val = eval(tree.right, env);
         e.insert(tree.left, val, env);
+        return null;
     }
 }
