@@ -41,6 +41,7 @@ public class Lexer {
                 case '<':
                 case '>':
                 case '=':
+                case '!':
                 case '&':
                 case '|':
                     return lexOperator(readOperator(ch));
@@ -151,6 +152,7 @@ public class Lexer {
         switch (oper) {
             case "=": return new Lexeme("ASSIGN");
             case "==": return new Lexeme("EQUAL");
+            case "!=": return new Lexeme("NOTEQUAL");
             case "+": return new Lexeme("PLUS");
             case "-": return new Lexeme("MINUS");
             case "*": return new Lexeme("MULT");
@@ -180,6 +182,8 @@ public class Lexer {
                 return new Lexeme("IF");
             case "else":
                 return new Lexeme("ELSE");
+            case "while":
+                return new Lexeme("WHILE");
             case "true":
                 return new Lexeme("TRUE");
             case "false":

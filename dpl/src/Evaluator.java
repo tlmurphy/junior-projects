@@ -29,6 +29,7 @@ public class Evaluator {
             case "LESS":
             case "GEQUAL":
             case "LEQUAL":
+            case "NOTEQUAL":
             case "EQUAL": return evalOperator(tree, env);
             case "AND": return evalAnd(tree, env);
             case "OR": return evalOr(tree, env);
@@ -81,6 +82,7 @@ public class Evaluator {
             case "LESS": return new Lexeme("BOOLEAN", left.intVal < right.intVal);
             case "LEQUAL": return new Lexeme("BOOLEAN", left.intVal <= right.intVal);
             case "EQUAL": return new Lexeme("BOOLEAN", left.intVal == right.intVal);
+            case "NOTEQUAL": return new Lexeme("BOOLEAN", left.intVal != right.intVal);
             default:
                 System.out.println("Defaulted on the evalOperator function for some reason...");
                 System.exit(-1);
@@ -98,12 +100,18 @@ public class Evaluator {
 
     private Lexeme evalVarAssign(Lexeme tree, Lexeme env) {
         Lexeme var = tree.left;
-        Lexeme val = tree.right;
+        Lexeme val = eval(tree.right, env); // This could be an expression, so evaluate it.
         e.updateEnv(var, val, env);
         return null;
     }
 
     private Lexeme evalWhile(Lexeme tree, Lexeme env) {
+        Lexeme whileExpression = tree.left;
+        Lexeme whileBody = tree.right;
+        Lexeme local = e.extendEnv(env, e.getVars(env), e.getVals(env));
+        while (eval(whileExpression, local).boolVal) {
+            eval(whileBody, local);
+        }
         return null;
     }
 
@@ -112,7 +120,7 @@ public class Evaluator {
         Lexeme ifBody = tree.left.right;
         Lexeme elseStatement = tree.right;
         Lexeme local = e.extendEnv(env, e.getVars(env), e.getVals(env));
-        if (eval(ifExpression, env).boolVal) {
+        if (eval(ifExpression, local).boolVal) {
             eval(ifBody, local);
         } else {
             eval(elseStatement, local);

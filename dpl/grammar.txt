@@ -48,6 +48,6 @@ optElse : ELSE block
 expression : unary operator expression
            | unary
 
-
+whileLoop : WHILE OPAREN expression CPAREN block
 
 

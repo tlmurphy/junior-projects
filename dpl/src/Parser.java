@@ -59,7 +59,8 @@ public class Parser {
                 varDefPending() ||
                 printPending() ||
                 check("COMMENT") ||
-                ifPending();
+                ifPending() ||
+                whilePending();
     }
 
     private boolean blockPending() {
@@ -105,6 +106,19 @@ public class Parser {
         return tree;
     }
 
+    private boolean whilePending() {
+        return check("WHILE");
+    }
+
+    private Lexeme whileLoop() {
+        Lexeme tree = match("WHILE");
+        match("OPAREN");
+        tree.left = expression();
+        match("CPAREN");
+        tree.right = block();
+        return tree;
+    }
+
     private boolean varAssignPending() {
         return check("VARIABLE");
     }
@@ -130,6 +144,8 @@ public class Parser {
             tree.left = ifStatement();
         } else if (varAssignPending()) {
             tree.left = varAssign();
+        } else if (whilePending()) {
+            tree.left = whileLoop();
         }
         return tree;
     }
@@ -182,6 +198,7 @@ public class Parser {
                 check("MULT") ||
                 check("DIVIDE") ||
                 check("EQUAL") ||
+                check("NOTEQUAL") ||
                 check("GREATER") ||
                 check("GEQUAL") ||
                 check("LESS") ||
