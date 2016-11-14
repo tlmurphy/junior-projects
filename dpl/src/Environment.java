@@ -63,4 +63,14 @@ public class Environment {
         setCdr(table, cons("GLUE", value, cdr(table)));
         return value;
     }
+
+    public Lexeme getVars(Lexeme env) {
+        Lexeme table = car(env);
+        return car(table);
+    }
+
+    public Lexeme getVals(Lexeme env) {
+        Lexeme table = car(env);
+        return cdr(table);
+    }
 }

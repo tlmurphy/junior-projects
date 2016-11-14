@@ -8,8 +8,13 @@ public class Evaluator {
     }
 
     public Lexeme eval(Lexeme tree, Lexeme env) {
+        if (tree == null) {
+            return null;
+        }
         switch (tree.type) {
-            case "STATEMENTS": return eval(tree.left, env);
+            case "STATEMENTS":
+                eval(tree.left, env);
+                return eval(tree.right, env);
             case "STATEMENT": return eval(tree.left, env);
             case "COMMENT": return null;
             case "INTEGER": return tree;
@@ -30,7 +35,7 @@ public class Evaluator {
             case "ASSIGN": return evalAssign(tree, env);
             case "LET": evalVarDef(tree, env);
             case "FUNCTION": return evalFuncDef(tree, env);
-            case "IF": return evalIf(tree, env);
+            case "IF": evalIf(tree, env);
             case "WHILE": return evalWhile(tree, env);
             case "FUNC_CALL": return evalFuncCall(tree, env);
             case "BLOCK": return evalBlock(tree, env);
@@ -109,8 +114,9 @@ public class Evaluator {
     }
 
     private void evalIf(Lexeme tree, Lexeme env) {
+        Lexeme local = e.extendEnv(env, e.getVars(env), e.getVals(env));
         if (eval(tree.left, env).boolVal) {
-            eval(tree.right, env);
+            eval(tree.right, local);
         }
     }
 

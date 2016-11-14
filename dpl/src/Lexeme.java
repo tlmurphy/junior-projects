@@ -78,7 +78,6 @@ public class Lexeme {
 
     @Override
     public String toString() {
-        String returnString = this.type + ": ";
         switch (this.type) {
             case "STRING":
                 return this.strVal.replace("\"", "");
@@ -88,9 +87,9 @@ public class Lexeme {
                 if (this.boolVal) return "true";
                 else return "false";
             case "ARRAY":
-                return returnString + this.arrayVal;
+                return this.arrayVal.toString();
             case "VARIABLE":
-                return returnString + this.varVal;
+                return this.varVal;
             default:
                 return this.type.toUpperCase();
         }

@@ -1,3 +1,10 @@
-if (5 < 40) {
+let alpha = 56;
+
+if (100 < 40) {
     print("This should print!");
+    print("This also should print!");
+    print(alpha);
+    let beta = 90;
 }
+
+print(beta);
