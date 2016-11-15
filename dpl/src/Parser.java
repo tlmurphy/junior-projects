@@ -55,12 +55,13 @@ public class Parser {
     }
 
     private boolean statementPending() {
-        return  expressionPending() ||
+        return  expressionPending() || // This also handles func calls and var assigns
                 varDefPending() ||
                 printPending() ||
                 check("COMMENT") ||
                 ifPending() ||
-                whilePending();
+                whilePending() ||
+                funcDefPending();
     }
 
     private boolean blockPending() {
@@ -119,17 +120,46 @@ public class Parser {
         return tree;
     }
 
-    private boolean varAssignPending() {
+    private boolean varPending() {
         return check("VARIABLE");
     }
 
-    private Lexeme varAssign() {
-        Lexeme temp = match("VARIABLE");
+    private Lexeme varAssign(Lexeme temp) {
         Lexeme tree = match("ASSIGN");
         tree.left = temp;
         tree.right = expression();
         match("SEMI");
         return tree;
+    }
+
+    private Lexeme funcCall(Lexeme temp) {
+        Lexeme tree = new Lexeme("FUNC_CALL");
+        tree.left = temp;
+        match("OPAREN");
+        tree.right = optArgList();
+        match("CPAREN");
+        match("SEMI");
+        return tree;
+    }
+
+    private Lexeme optArgList() {
+        if (argListPending()) {
+            return argList();
+        } else return null;
+    }
+
+    private Lexeme argList() {
+        Lexeme tree = new Lexeme("GLUE");
+        tree.left = unary();
+        if (check("COMMA")) {
+            match("COMMA");
+            tree.right = argList();
+        }
+        return tree;
+    }
+
+    private boolean argListPending() {
+        return unaryPending();
     }
 
     private Lexeme statement() {
@@ -138,12 +168,16 @@ public class Parser {
             tree.left = match("COMMENT");
         } else if (varDefPending()) {
             tree.left = varDef();
+        } else if (funcDefPending()) {
+            tree.left = functionDef();
         } else if (printPending()) {
             tree.left = print();
         } else if (ifPending()) {
             tree.left = ifStatement();
-        } else if (varAssignPending()) {
-            tree.left = varAssign();
+        } else if (varPending()) {
+            Lexeme temp = match("VARIABLE");
+            if (check("OPAREN")) tree.left = funcCall(temp);
+            else tree.left = varAssign(temp);
         } else if (whilePending()) {
             tree.left = whileLoop();
         }
@@ -223,22 +257,47 @@ public class Parser {
     }
 
     private Lexeme functionDef() {
+        Lexeme tree = match("FUNCTION");
         if (check("VARIABLE")) {
-            match("VARIABLE");
-            // Match the parentheses and the optional parameter list
+            tree.left = match("VARIABLE");
+            match("OPAREN");
+            tree.right = new Lexeme("GLUE");
+            tree.right.left = optParameterList();
+            match("CPAREN");
+            tree.right.right = block();
         }
-        return null;
+        return tree;
     }
 
-    private boolean functionPending() {
+    private boolean funcDefPending() {
         return check("FUNCTION");
+    }
+
+    private Lexeme optParameterList() {
+        if (parameterListPending()) {
+            return parameterList();
+        } else return null;
+    }
+
+    private Lexeme parameterList() {
+        Lexeme tree = new Lexeme("GLUE");
+        tree.left = match("VARIABLE");
+        if (check("COMMA")) {
+            match("COMMA");
+            tree.right = parameterList();
+        }
+        return tree;
+    }
+
+    private boolean parameterListPending() {
+        return check("VARIABLE");
     }
 
     private Lexeme varDef() {
         Lexeme tree = match("LET");
         tree.left = match("VARIABLE");
         match("ASSIGN");
-        if (functionPending()) {
+        if (funcDefPending()) {
             tree.right = functionDef();
         } else {
             tree.right = expression();

@@ -47,23 +47,6 @@ public class Evaluator {
         return null;
     }
 
-    private Lexeme evalFuncCall(Lexeme tree, Lexeme env) {
-//        String name = getCallName(tree);
-//        Lexeme args = getFuncCallArgs(tree);
-//        Lexeme eargs = evalArgs(args,env);
-//        // Checking for built in functions
-//        switch (name) {
-//            case "println": return evalPrintln(eargs);
-//        }
-//        Lexeme params = getClosureParams(closure);
-//        Lexeme body = getClosureBody(closure);
-//        Lexeme senv = getClosureEnvironment(closure);
-//        Lexeme xenv = EnvExtend(senv,params,eargs);
-//
-//        return eval(body,xenv);
-        return null;
-    }
-
     private Lexeme evalPrint(Lexeme tree, Lexeme env) {
         System.out.println(eval(tree, env));
         return null;
@@ -129,7 +112,29 @@ public class Evaluator {
     }
 
     private Lexeme evalFuncDef(Lexeme tree, Lexeme env) {
+        Lexeme closure = e.cons("CLOSURE", env, tree);
+        e.insert(tree.left, closure, env);
         return null;
+    }
+
+    private Lexeme evalArgs(Lexeme args, Lexeme env) {
+        if (args == null) return null;
+        args.left = eval(args.left, env);
+        if (args.right != null) {
+            args.right = evalArgs(args.right, env);
+        }
+        return args;
+    }
+
+    private Lexeme evalFuncCall(Lexeme tree, Lexeme env) {
+        Lexeme closure = eval(tree.left, env);
+        Lexeme args = tree.right;
+        Lexeme params = closure.right.right.left;
+        Lexeme body = closure.right.right.right;
+        Lexeme senv = closure.left;
+        Lexeme eargs = evalArgs(args, env);
+        Lexeme xenv = e.extendEnv(senv, params, eargs);
+        return eval(body, xenv);
     }
 
     private Lexeme evalVarDef(Lexeme tree, Lexeme env) {
