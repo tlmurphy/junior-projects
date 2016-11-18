@@ -1,8 +1,0 @@
-let alpha = 77;
-
-func newFunction(alpha) {
-    if (alpha == 77) {
-        print("hello")
-    }
-    return 33.890067;
-}
