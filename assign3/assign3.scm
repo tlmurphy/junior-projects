@@ -19,30 +19,79 @@
 
 (define (nonlocals func)
     (define locals (get 'parameters func))
-    (define body (get 'code func))
+    (define body (cdr (get 'code func)))
 
-    (define (iterateLocals l returnLyst)
+    (define (nesting body nestedLocals)
         (cond
-            ((null? l) returnLyst)
+            ((null? body) nestedLocals)
+            ((pair? (car body)) (nesting (cdr body) (append (nesting (car body) nestedLocals) nestedLocals)))
             (else
-                (iterateLocals (cdr l) (append returnLyst (removeLocals (car l)))))))
+                (if (equal? (type (car body)) 'SYMBOL)
+                    (nesting (cdr body) (cons (car body) nestedLocals))
+                    (nesting (cdr body) nestedLocals)))))
 
-    (define (removeLocals local)
+    (define (in? a list)
+        (if (null? list)
+            #f
+            (if (equal? a (car list))
+                #t
+                (in? a (cdr list)))))
 
-        (define (filter predicate sequence)
-            (cond
-                ((null? sequence) nil)
-                ((predicate (car sequence)) (cons (car sequence)
-                                                  (filter predicate (cdr sequence))))
-                (else (filter predicate (cdr sequence)))))
+    (define (removeDuplicates list newList)
+        (if (null? list)
+            newList
+            (if (not (in? (car list) newList))
+                (removeDuplicates (cdr list) (cons (car list) newList))
+                (removeDuplicates (cdr list) newList))))
 
-        (define (iter returnLyst body)
-            (println returnLyst)
-            (if (null? body)
-                returnLyst
-                (filter (equal? local) body)))
-        (iter '() body))
-    (iterateLocals locals '(begin )))
+    (define (getLocals body locals)
+        (cond
+            ((null? body) locals)
+            (else
+                (append (nesting (car body) '()) (getLocals (cdr body) locals)))))
+
+    (define (removeLocals list newList)
+        (if (null? list) newList
+            (if (not (in? (car list) locals))
+                (removeLocals (cdr list) (cons (car list) newList))
+                (removeLocals (cdr list) newList))))
+
+    (cons 'begin (removeDuplicates (removeLocals (getLocals body '()) '()) '())))
+
+
+(define (run1)
+    (define (square x) (* x x))
+    (define (test1 x y z)
+        (if (> x y)
+            (println "AYY")
+            (println "OH"))
+        (+ z 1))
+    (define (test2 x)
+        (define zz (+ x 1))
+        (println "HEY")
+        (- zz 10))
+    ;(inspect (nonlocals square))
+    (inspect (nonlocals test2)))
+
+(run1)
+
+;(define (iter returnLyst body)
+;    (define (getNonLocals item list notLocal)
+;        (println (car list))
+;        (cond
+;            ((null? list) #f)
+;            ((not (equal? item (car list))) getNonLocals item (cdr list) (cons (car list) notLocal))
+;            (else
+;                (getNonLocals item (cdr list) notLocal))))
+;    (if (null? body)
+;        returnLyst
+;        (iter (append returnLyst
+;                      (getNonLocals local (car body) returnLyst))
+;              (cdr body))))
+;
+;(iter '() (cdr body)))
+;
+;(append (iterateLocals locals '()) (list 'begin)))
 
 ;===================================Task 2======================================
 
