@@ -44,17 +44,17 @@
                 (removeDuplicates (cdr list) (cons (car list) newList))
                 (removeDuplicates (cdr list) newList))))
 
-    (define (getLocals body locals)
-        (cond
-            ((null? body) locals)
-            (else
-                (append (nesting (car body) '()) (getLocals (cdr body) locals)))))
-
     (define (removeLocals list newList)
         (if (null? list) newList
             (if (not (in? (car list) locals))
                 (removeLocals (cdr list) (cons (car list) newList))
                 (removeLocals (cdr list) newList))))
+
+    (define (getLocals body locals)
+        (cond
+            ((null? body) locals)
+            (else
+                (append (nesting (car body) '()) (getLocals (cdr body) locals)))))
 
     (cons 'begin (removeDuplicates (removeLocals (getLocals body '()) '()) '())))
 
@@ -70,30 +70,49 @@
         (define zz (+ x 1))
         (println "HEY")
         (- zz 10))
-    ;(inspect (nonlocals square))
+    (inspect (nonlocals square))
     (inspect (nonlocals test2)))
 
-(run1)
-
-;(define (iter returnLyst body)
-;    (define (getNonLocals item list notLocal)
-;        (println (car list))
-;        (cond
-;            ((null? list) #f)
-;            ((not (equal? item (car list))) getNonLocals item (cdr list) (cons (car list) notLocal))
-;            (else
-;                (getNonLocals item (cdr list) notLocal))))
-;    (if (null? body)
-;        returnLyst
-;        (iter (append returnLyst
-;                      (getNonLocals local (car body) returnLyst))
-;              (cdr body))))
-;
-;(iter '() (cdr body)))
-;
-;(append (iterateLocals locals '()) (list 'begin)))
 
 ;===================================Task 2======================================
+
+(define (replace func sym repl)
+    (define body (cdr (get 'code func)))
+
+    (define (nesting body nested)
+        (cond
+            ((null? body) nested)
+            ((pair? (car body)) (nesting (cdr body) (append nested (list (nesting (car body) '())))))
+            (else
+                (if (equal? (car body) sym)
+                    (nesting (cdr body) (append nested (list repl)))
+                    (nesting (cdr body) (append nested (list (car body))))))))
+
+    (define (iterBody body)
+        (if (null? body)
+            nil
+            (cons (nesting (car body) '()) (iterBody (cdr body)))))
+
+    (cons 'begin (iterBody body)))
+
+(define (run2)
+    (define (square x) (* x x))
+    (define (test1 x y z)
+        (if (> x y)
+            (println "AYY")
+            (println "OH"))
+        (+ z 1))
+
+    (define (test2 x y z)
+        (if (> z 1)
+            (+ z 1)))
+
+    (inspect (test1 1 2 3))
+    (println (replace test1 '+ *))
+    (set 'code (replace test1 '+ *) test1)
+    (inspect (test1 1 2 3)))
+
+(run2)
 
 ;===================================Task 3======================================
 
@@ -102,6 +121,9 @@
 ;===================================Task 5======================================
 
 ;===================================Task 6======================================
+
+
+(define (run6))
 
 ;===================================Task 7======================================
 
