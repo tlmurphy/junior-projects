@@ -79,21 +79,16 @@
 (define (replace func sym repl)
     (define body (cdr (get 'code func)))
 
-    (define (nesting body nested)
+    (define (iterBody body newBody)
         (cond
-            ((null? body) nested)
-            ((pair? (car body)) (nesting (cdr body) (append nested (list (nesting (car body) '())))))
+            ((null? body) newBody)
+            ((pair? (car body)) (iterBody (cdr body) (append newBody (list (iterBody (car body) '())))))
             (else
                 (if (equal? (car body) sym)
-                    (nesting (cdr body) (append nested (list repl)))
-                    (nesting (cdr body) (append nested (list (car body))))))))
+                    (iterBody (cdr body) (append newBody (list repl)))
+                    (iterBody (cdr body) (append newBody (list (car body))))))))
 
-    (define (iterBody body)
-        (if (null? body)
-            nil
-            (cons (nesting (car body) '()) (iterBody (cdr body)))))
-
-    (cons 'begin (iterBody body)))
+    (cons 'begin (iterBody body '())))
 
 (define (run2)
     (define (square x) (* x x))
@@ -111,8 +106,6 @@
     (println (replace test1 '+ *))
     (set 'code (replace test1 '+ *) test1)
     (inspect (test1 1 2 3)))
-
-(run2)
 
 ;===================================Task 3======================================
 
