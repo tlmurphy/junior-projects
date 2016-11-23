@@ -68,7 +68,6 @@
     (inspect (nonlocals square))
     (inspect (nonlocals test2)))
 
-(run1)
 
 ;===================================Task 2======================================
 
@@ -103,6 +102,7 @@
     (set 'code (replace test1 '+ *) test1)
     (inspect (test1 1 2 3)))
 
+
 ;===================================Task 3======================================
 
 ;===================================Task 4======================================
@@ -111,8 +111,44 @@
 
 ;===================================Task 6======================================
 
+;Notes 11/10/16
 
-(define (run6))
+(define scar stream-car)
+(define scdr stream-cdr)
+(define scons cons-stream)
+
+(define (svdisplay s n)
+	(cond
+		((= n 1) (print (scar s)))
+		((> n 1) (print (scar s) ",") (svdisplay (scdr s) (- n 1)))
+		(else nil)))
+
+(define (stream-display s n) (print "[") (svdisplay s n) (println "...]"))
+(define (divisible? x y) (= (remainder x y) 0))
+
+(define (big-gulp)
+    (define (integers-starting-from n)
+        (if (or (seven-primes n) (eleven-primes n))
+            (scons n (integers-starting-from (+ n 1)))
+            (integers-starting-from (+ n 1))))
+    (integers-starting-from 7))
+
+(define (seven-primes n)
+    (if (or (= n 7) (= n 11))
+        #t
+        (and (divisible? n 7) (seven-primes (/ n 7)))))
+
+(define (eleven-primes n)
+    (if (or (= n 11) (= n 7))
+        #t
+        (and (divisible? n 11) (eleven-primes (/ n 11)))))
+
+(define bgs (big-gulp))
+
+(define (run6)
+    (stream-display bgs 5))
+
+(run6)
 
 ;===================================Task 7======================================
 
