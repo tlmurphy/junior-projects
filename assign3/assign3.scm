@@ -19,45 +19,40 @@
 
 (define (nonlocals func)
     (define locals (get 'parameters func))
-    (define body (cdr (get 'code func)))
+    (define body (get 'code func))
 
-    (define (nesting body nestedLocals)
+    (define (iterBody body newBody)
         (cond
-            ((null? body) nestedLocals)
-            ((pair? (car body)) (nesting (cdr body) (append (nesting (car body) nestedLocals) nestedLocals)))
+            ((null? body) newBody)
+            ((pair? (car body)) (iterBody (cdr body) (append newBody (iterBody (car body) '()))))
             (else
-                (if (equal? (type (car body)) 'SYMBOL)
-                    (nesting (cdr body) (cons (car body) nestedLocals))
-                    (nesting (cdr body) nestedLocals)))))
+                (if (and (not (in? (car body) locals)) (equal? (type (car body)) 'SYMBOL))
+                    (iterBody (cdr body) (cons (car body) newBody))
+                    (iterBody (cdr body) newBody)))))
 
-    (define (in? a list)
+    ; Old version of in?
+    (define (old-in? a list)
         (if (null? list)
             #f
             (if (equal? a (car list))
                 #t
                 (in? a (cdr list)))))
 
+    ; I'm getting better with recursion
+    (define (in? a list)
+        (if (not (null? list))
+            (or (equal? a (car list)) (in? a (cdr list)))))
+
+
+    ; There shouldn't be any duplicates
     (define (removeDuplicates list newList)
         (if (null? list)
             newList
             (if (not (in? (car list) newList))
-                (removeDuplicates (cdr list) (cons (car list) newList))
+                (removeDuplicates (cdr list) (append newList (cons (car list) nil)))
                 (removeDuplicates (cdr list) newList))))
 
-    (define (removeLocals list newList)
-        (if (null? list) newList
-            (if (not (in? (car list) locals))
-                (removeLocals (cdr list) (cons (car list) newList))
-                (removeLocals (cdr list) newList))))
-
-    (define (getLocals body locals)
-        (cond
-            ((null? body) locals)
-            (else
-                (append (nesting (car body) '()) (getLocals (cdr body) locals)))))
-
-    (cons 'begin (removeDuplicates (removeLocals (getLocals body '()) '()) '())))
-
+    (removeDuplicates (iterBody body '()) '()))
 
 (define (run1)
     (define (square x) (* x x))
@@ -73,6 +68,7 @@
     (inspect (nonlocals square))
     (inspect (nonlocals test2)))
 
+(run1)
 
 ;===================================Task 2======================================
 
