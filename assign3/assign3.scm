@@ -111,61 +111,255 @@
 
 ;===================================Task 3======================================
 
-(define (node value)
-    (define (helper val l r leftHeight rightHeight height) this)
-    (helper value nil nil 0 0 0))
+(define (node value parent)
+    (define (helper val l r p lHeight rHeight height) this)
+    (helper value nil nil parent 0 0 1))
+
+; Queue from Lusth's notes...
+(define (Queue)
+    (define front (list 'head))
+    (define back nil)
+
+    (define (this msg . args)
+        (cond
+            ((eq? msg 'enqueue) (apply enqueue args))
+            ((eq? msg 'dequeue) (apply dequeue args))
+            ((eq? msg 'empty?) (apply empty? args))
+            (else (error "queue message not understood: " msg))
+            )
+        )
+    (define (enqueue x) ; add to the back
+        (set-cdr! back (list x))
+        (set! back (cdr back))
+        )
+    (define (dequeue) ; remove from the front
+        ; user is responsible ensuring queue is non empty
+        (define tmp (cadr front))
+        (set-cdr! front (cddr front))
+        (if (null? (cdr front))
+            (set! back front)
+            )
+        tmp
+        )
+    (define (empty?)
+        (eq? (cdr front) nil)
+        )
+
+    (set! back front)
+    this
+    )
 
 (define (avl)
 
     (define (helper s root)
 
         ; Methods
-        (define (size) (println s))
+        (define (size) s)
+
+        (define (max x y)
+            (if (> x y)
+                x
+                y))
+
+        (define (setBalance x)
+            (if (null? (x 'l))
+                (set 'lHeight 0 x)
+                (set 'lHeight ((x 'l) 'height) x))
+            (if (null? (x 'r))
+                (set 'rHeight 0 x)
+                (set 'rHeight ((x 'r) 'height) x))
+            (set 'height (+ (max (x 'lHeight) (x 'rHeight)) 1) x)
+            (if (not (null? (x 'p)))
+                (if (isRight? x)
+                    (set 'rHeight (x 'height) (x 'p))
+                    (set 'lHeight (x 'height) (x 'p)))))
+
+        (define (sibling x)
+            (if (eq? x ((x 'p) 'l))
+                ((x 'p) 'r))
+            (if (eq? x ((x 'p) 'r))
+                ((x 'p) 'l)))
+
+        (define (bFactor x)
+            (- (x 'lHeight) (x 'rHeight)))
+
+        (define (isRight? x)
+            (eq? x ((x 'p) 'r)))
+
+        (define (isLeft? x)
+            (eq? x ((x 'p) 'l)))
+
+        (define (favorSibling? x)
+            (if (isRight? x)
+                (cond
+                    ((= 1 (bFactor (x 'p))) #t)
+                    ((= (- 1) (bFactor (x 'p))) #f)
+                    (else #f))
+                (cond
+                    ((= 1 (bFactor (x 'p))) #f)
+                    ((= (- 1) (bFactor (x 'p))) #t)
+                    (else #f))))
+
+        (define (isBalanced? x)
+            (or (= 1 (bFactor x)) (= (- 1) (bFactor x)) (= 0 (bFactor x))))
+
+        (define (favoriteChild x)
+            (cond
+                ((= 1 (bFactor x)) (x 'l))
+                ((= (- 1) (bFactor x)) (x 'r))
+                (else nil)))
+
+        (define (linear? p x y)
+            (or (and (eq? (p 'r) x) (eq? (x 'r) y))
+                (and (eq? (p 'l) x) (eq? (x 'l) y))))
+
+        (define (rotateYX y x)
+            (if (isLeft? y)
+                (rotateRight y x)
+                (rotateLeft y x)))
+
+        (define (rotateYP y p)
+            (if (isLeft? y)
+                (rotateRight y p)
+                (rotateLeft y p)))
+
+        (define (rotateXP x p)
+            (if (isRight? x)
+                (rotateLeft x p)
+                (rotateRight x p)))
+
+        (define (rotateLeft a b)
+            (define left (a 'l))
+            (define p (b 'p))
+            (if (null? p)
+                (set! root a)
+                (if (isLeft? b)
+                    (set 'l a p)
+                    (set 'r a p)))
+            (set 'l b a)
+            (set 'r left b)
+            (if (not (null? left))
+                (set 'p b left))
+            (set 'p a b)
+            (set 'p p a))
+
+        (define (rotateRight a b)
+            (define right (a 'r))
+            (define p (b 'p)) ; 12
+            (if (null? p)
+                (set! root a)
+                (if (isLeft? b)
+                    (set 'l a p)
+                    (set 'r a p)))
+            (set 'r b a)
+            (set 'l right b)
+            (if (not (null? right))
+                (set 'p b right))
+            (set 'p a b)
+            (set 'p p a))
+
+        (define (fix x)
+            (if (eq? x root)
+                (set! root x)
+                (cond
+                    ((favorSibling? x) (setBalance (x 'p)))
+                    ((isBalanced? (x 'p))
+                        (setBalance (x 'p))
+                        (set! x (x 'p))
+                        (fix x))
+                    (else
+                        (define y (favoriteChild x))
+                        (define p (x 'p))
+                        (if (and (not (null? y)) (not (linear? p x y)))
+                            (begin
+                                (rotateYX y x)
+                                (rotateYP y p)
+                                (setBalance x)
+                                (setBalance p)
+                                (setBalance y))
+                            (begin
+                                (rotateXP x p)
+                                (setBalance p)
+                                (setBalance x)))))))
 
         (define (insert n)
             (++ s)
             (define (iter p)
-                (if (not (null? p)) (println (p 'val)))
                 (if (null? p)
-                    (set! root (node n))
-                    (if (< (p 'val) n)
-                        (if (null? (p 'r))
-                            (set! p (node n))
-                            (iter (p 'r)))
+                    (set! root (node n nil))
+                    (if (< n (p 'val))
                         (if (null? (p 'l))
-                            (set p (node n) this)
-                            (iter (p 'l))))))
+                            (begin
+                                (set 'l (node n p) p)
+                                (set 'lHeight 1 p)
+                                (fix (p 'l)))
+                            (iter (p 'l)))
+                        (if (null? (p 'r))
+                            (begin
+                                (set 'r (node n p) p)
+                                (set 'rHeight 1 p)
+                                (fix (p 'r)))
+                            (iter (p 'r))))))
             (iter root))
 
         (define (find n)
-            (define (iter root)
+            (define (iter p)
                 (cond
-                    ((null? (this 'root)) #f)
-                    ((= ((this 'root) 'val) n) #t)
-                    ((< n ((this 'root) 'val)) (iter ((this 'root) 'l)))
+                    ((null? p) #f)
+                    ((= (p 'val) n) #t)
+                    ((< n (p 'val)) (iter (p 'l)))
                     (else
-                        (iter ((this 'root) 'r)))))
-            (iter (this 'root)))
-        (define (statistics))
+                        (iter (p 'r)))))
+            (iter root))
+
+        (define (statistics)
+            (define (levelOrder q)
+                (if ((q 'empty?))
+                    nil
+                    (begin
+                        (define node ((q 'dequeue)))
+                        (print (node 'val) ":" (bFactor node) " ")
+                        (if (not (null? (node 'l)))
+                            ((q 'enqueue) (node 'l)))
+                        (if (not (null? (node 'r)))
+                            ((q 'enqueue) (node 'r)))
+                        (levelOrder q))))
+            (define newQueue (Queue))
+            ((newQueue 'enqueue) root)
+            (levelOrder newQueue)
+            (println))
+
         this)
     (helper 0 nil))
 
 (define (run3)
     (define t (avl))
     ((t 'insert) 3)
-    (println "ROOT: " ((t 'root) 'val))
+    ((t 'insert) 4)
     ((t 'insert) 5)
-    (println "ROOT: " (((t 'root) 'r) 'val))
-    ;((t 'root) 'val)
-    ;((t 'insert) 4)
-    ;((t 'insert) 5)
-    ;((t 'insert) 1)
-    ;((t 'insert) 0)
-    ;(println ((t 'root) 'val))
-    ;(inspect ((t 'find) 5))     ; should return #t
-    ;(inspect ((t 'find) 7))     ; should return #f
-    ;((t 'size))       ; should return 5
-    ((t 'statistics))) ; should print 4:1 1:0 5:0 0:0 3:0
+    ((t 'insert) 1)
+    ((t 'insert) 12)
+    ((t 'insert) 55)
+    ((t 'insert) 6)
+    ((t 'insert) 90)
+    ((t 'insert) 122)
+    ((t 'insert) 54)
+    ((t 'insert) 32)
+    ((t 'insert) 15)
+    ((t 'insert) 905)
+    ((t 'insert) 67)
+    ((t 'insert) 322)
+    ((t 'insert) 78)
+    ((t 'insert) 45)
+    ((t 'insert) 46)
+    ((t 'insert) 47)
+    ((t 'insert) 48)
+    (inspect ((t 'find) 90))    ; should return #t
+    (inspect ((t 'find) 5))     ; should return #t
+    (inspect ((t 'find) 322))   ; should return #t
+    (inspect ((t 'find) 7))     ; should return #f
+    (inspect ((t 'size)))       ; should return 20
+    ((t 'statistics)))
 
 (run3)
 
