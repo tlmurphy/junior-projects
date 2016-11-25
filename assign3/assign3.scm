@@ -111,6 +111,64 @@
 
 ;===================================Task 3======================================
 
+(define (node value)
+    (define (helper val l r leftHeight rightHeight height) this)
+    (helper value nil nil 0 0 0))
+
+(define (avl)
+
+    (define (helper s root)
+
+        ; Methods
+        (define (size) (println s))
+
+        (define (insert n)
+            (++ s)
+            (define (iter p)
+                (if (not (null? p)) (println (p 'val)))
+                (if (null? p)
+                    (set! root (node n))
+                    (if (< (p 'val) n)
+                        (if (null? (p 'r))
+                            (set! p (node n))
+                            (iter (p 'r)))
+                        (if (null? (p 'l))
+                            (set p (node n) this)
+                            (iter (p 'l))))))
+            (iter root))
+
+        (define (find n)
+            (define (iter root)
+                (cond
+                    ((null? (this 'root)) #f)
+                    ((= ((this 'root) 'val) n) #t)
+                    ((< n ((this 'root) 'val)) (iter ((this 'root) 'l)))
+                    (else
+                        (iter ((this 'root) 'r)))))
+            (iter (this 'root)))
+        (define (statistics))
+        this)
+    (helper 0 nil))
+
+(define (run3)
+    (define t (avl))
+    ((t 'insert) 3)
+    (println "ROOT: " ((t 'root) 'val))
+    ((t 'insert) 5)
+    (println "ROOT: " (((t 'root) 'r) 'val))
+    ;((t 'root) 'val)
+    ;((t 'insert) 4)
+    ;((t 'insert) 5)
+    ;((t 'insert) 1)
+    ;((t 'insert) 0)
+    ;(println ((t 'root) 'val))
+    ;(inspect ((t 'find) 5))     ; should return #t
+    ;(inspect ((t 'find) 7))     ; should return #f
+    ;((t 'size))       ; should return 5
+    ((t 'statistics))) ; should print 4:1 1:0 5:0 0:0 3:0
+
+(run3)
+
 ;===================================Task 4======================================
 
 (define true #t)
@@ -294,6 +352,25 @@
 
 ;===================================Task 5======================================
 
+(define (barrier)
+    (define (set threadNum)
+        (if (= threadNum 0)
+            nil
+            (begin
+                (tjoin (thread (gettid)))
+                (set (- threadNum 1)))))
+    (define (install) (lock))
+    (define (remove) (unlock))
+    this)
+
+(define (run5)
+    (debugSemaphore #t)
+    (define b (barrier))
+    ((b 'set) 3)
+    ((b 'install))
+    ((b 'remove)))
+
+
 ;===================================Task 6======================================
 
 (define scar stream-car)
@@ -476,10 +553,11 @@
                    (cons-stream num (ramanujan (stream-cdr s) num)))
               (else (ramanujan (stream-cdr s) num)))))
 
-;(display-stream (ramanujan sortedStream 0))
+
 
 (define (run9)
-    (stream-display (ramujan-numbers) 5))
+    ;(display-stream (ramanujan sortedStream 0))
+    (stream-display (ramanujan) 5))
 
 ;(run9)
 (println "assignment 3 loaded!")
