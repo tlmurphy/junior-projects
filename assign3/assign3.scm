@@ -361,7 +361,6 @@
     (inspect ((t 'size)))       ; should return 20
     ((t 'statistics)))
 
-(run3)
 
 ;===================================Task 4======================================
 
@@ -749,9 +748,8 @@
 
 
 
-(define (run9)
-    ;(display-stream (ramanujan sortedStream 0))
-    (stream-display (ramanujan) 5))
+;(define (run9)
+;    ;(display-stream (ramanujan sortedStream 0))
+;    (stream-display (ramanujan) 5))
 
-;(run9)
 (println "assignment 3 loaded!")
