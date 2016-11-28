@@ -620,27 +620,36 @@
 (define (add-streams s1 s2)
     (stream-map + s1 s2))
 
+(define (sub-streams s1 s2)
+    (stream-map - s1 s2))
+
 (define (scale-stream stream factor)
     (stream-map (lambda (x) (* x  factor)) stream))
+
+(define (scale-back-stream stream factor)
+    (stream-map (lambda (x) (/ (real x) (real factor))) stream))
 
 (define (signal f x dx)
     (scons (f x) (signal f (+ x dx) dx)))
 
+(define (sop op s t)
+    (scons (op (scar s) (scar t))
+           (sop op (scdr s) (scdr t))))
+
 (define (integral s dx)
     (define int
-        (scons (scar s)
-               (add-streams (scale-stream s dx)
+        (scons (* (scar s) dx)
+               (add-streams (scale-stream (scdr s) dx)
                             int)))
     int)
 
 (define (differential start s dx)
     (define int
-        (scons (scar s)
-               (add-streams (scale-stream s dx)
-                            int)))
-    int)
+        (scons (/ start dx)
+               (sub-streams
+                            int (scale-stream (scale-back-stream (scdr s) dx) (- 1))))))
 
-(define poly (signal (lambda (x) (- (+ (* x x) (* 3 x)) 4)) 0 1))
+(define poly (signal (lambda (x) (- (+ (* x x) (* 3 x)) 4)) 0 0.001))
 
 (define intPoly (integral poly 0.001))
 
@@ -650,7 +659,7 @@
 
 (define (run7)
     (stream-display poly 5)
-    (stream-display intPoly 10)
+    (stream-display intPoly 5)
     (stream-display divIntPoly 5)
     (stream-display substreams 5))
 
