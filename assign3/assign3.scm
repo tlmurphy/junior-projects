@@ -621,7 +621,7 @@
     (stream-map + s1 s2))
 
 (define (scale-stream stream factor)
-    (stream-map (lambda (x) (* x factor)) stream))
+    (stream-map (lambda (x) (* x  factor)) stream))
 
 (define (signal f x dx)
     (scons (f x) (signal f (+ x dx) dx)))
@@ -650,9 +650,11 @@
 
 (define (run7)
     (stream-display poly 5)
-    (stream-display intPoly 5)
+    (stream-display intPoly 10)
     (stream-display divIntPoly 5)
     (stream-display substreams 5))
+
+(run7)
 
 
 ;===================================Task 8======================================
@@ -666,8 +668,8 @@
 (define (mystery x)
     (define (mystery-stream term e)
         (if (even? term)
-            (scons (/ (real (^ x e)) (fact e)) (mystery-stream (+ term 1) (+ e 2)))
-            (scons (- (/ (real (^ x e)) (fact e))) (mystery-stream (+ term 1) (+ e 2)))))
+            (scons (/ (real (^ x e)) (real (fact e))) (mystery-stream (+ term 1) (+ e 2)))
+            (scons (- (/ (real (^ x e)) (real (fact e)))) (mystery-stream (+ term 1) (+ e 2)))))
     (mystery-stream 0 0))
 
 (define (ps-mystery x)
@@ -683,8 +685,8 @@
     (let ((s0 (stream-ref s 0))
           (s1 (stream-ref s 1))
           (s2 (stream-ref s 2)))
-        (scons (- s2 (/ (square (- s2 s1))
-                        (+ s0 (* (- 2) s1) s2)))
+        (scons (- s2 (/ (real (square (- s2 s1)))
+                        (real (+ s0 (* (- 2) s1) s2))))
                (euler-transform (scdr s)))))
 
 (define (acc-mystery x)
