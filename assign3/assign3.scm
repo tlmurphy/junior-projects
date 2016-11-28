@@ -645,15 +645,17 @@
 
 (define (differential start s dx)
     (define int
-        (scons (/ start dx)
-               (sub-streams
-                            int (scale-stream (scale-back-stream (scdr s) dx) (- 1))))))
+        (scons start
+            (scons (- start (scar s))
+                   (sub-streams int
+                                (scdr s)))))
+    int)
 
-(define poly (signal (lambda (x) (- (+ (* x x) (* 3 x)) 4)) 0 0.001))
+(define poly (signal (lambda (x) (- (+ (* x x) (* 3 x)) 4)) 0 0.000001))
 
-(define intPoly (integral poly 0.001))
+(define intPoly (integral poly 0.000001))
 
-(define divIntPoly (differential (scar intPoly) intPoly 0.001))
+(define divIntPoly (differential (scar poly) intPoly 0.000001))
 
 (define substreams (stream-map - poly divIntPoly))
 
