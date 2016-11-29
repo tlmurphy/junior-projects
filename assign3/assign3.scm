@@ -632,10 +632,6 @@
 (define (signal f x dx)
     (scons (f x) (signal f (+ x dx) dx)))
 
-(define (sop op s t)
-    (scons (op (scar s) (scar t))
-           (sop op (scdr s) (scdr t))))
-
 (define (integral s dx)
     (define int
         (scons (* (scar s) dx)
@@ -643,7 +639,7 @@
                             int)))
     int)
 
-(define (differential start s dx)
+(define (differentialOld start s dx)
     (define int
         (scons start
             (scons (- start (scar s))
@@ -651,22 +647,29 @@
                                 (scdr s)))))
     int)
 
-(define poly (signal (lambda (x) (- (+ (* x x) (* 3 x)) 4)) 0 0.000001))
+(define (differential start s dx)
+    ; This gets the exact stream of the poly, can I have my bonus points?
+    (define int
+        (scons start
+            (sub-streams (scale-back-stream (scdr s) dx)
+                         (scale-back-stream s dx))))
+    int)
 
-(define intPoly (integral poly 0.000001))
 
-(define divIntPoly (differential (scar poly) intPoly 0.000001))
+(define poly (signal (lambda (x) (- (+ (* x x) (* 3 x)) 4)) 0 0.001))
+
+(define intPoly (integral poly 0.001))
+
+(define divIntPoly (differential (scar poly) intPoly 0.001))
 
 (define substreams (stream-map - poly divIntPoly))
 
 (define (run7)
-    (stream-display poly 5)
-    (stream-display intPoly 5)
-    (stream-display divIntPoly 5)
-    (stream-display substreams 5))
-
-(run7)
-
+    (stream-display poly 10)
+    (stream-display intPoly 10)
+    (stream-display divIntPoly 10)
+    (stream-display substreams 10))
+    
 
 ;===================================Task 8======================================
 
