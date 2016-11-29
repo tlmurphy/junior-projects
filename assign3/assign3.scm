@@ -669,7 +669,7 @@
     (stream-display intPoly 10)
     (stream-display divIntPoly 10)
     (stream-display substreams 10))
-    
+
 
 ;===================================Task 8======================================
 
@@ -721,51 +721,52 @@
 
 ;===================================Task 9======================================
 
+(define ints (integers-starting-from 1))
+
 (define (merge-weighted s1 s2 weight)
   (cond ((stream-null? s1) s2)
         ((stream-null? s2) s1)
         (else
-          (let ((s1carweight (weight (stream-car s1)))
-                (s2carweight (weight (stream-car s2))))
-            (cond ((> s1carweight s2carweight)
-                   (cons-stream (stream-car s2)
-                                (merge-weighted s1 (stream-cdr s2) weight)))
-                  ((< s1carweight s2carweight)
-                   (cons-stream (stream-car s1)
-                                (merge-weighted (stream-cdr s1) s2 weight)))
-                  (else
-                    (cons-stream (stream-car s1)
-                                 (cons-stream (stream-car s2)
-                                              (merge-weighted (stream-cdr s1) (stream-cdr s2) weight)))))))))
+         (let ((s1car (stream-car s1))
+               (s2car (stream-car s2)))
+           (if (<= (weight s1car) (weight s2car))
+               (cons-stream s1car
+                            (merge-weighted (stream-cdr s1)
+                                            s2
+                                            weight))
+               (cons-stream s2car
+                            (merge-weighted s1
+                                            (stream-cdr s2)
+                                            weight)))))))
 
 (define (weighted-pairs s t weight)
-  (cons-stream (list (stream-car s) (stream-car t))
-               (merge-weighted
-                 (stream-map (lambda (x) (list (stream-car s) x))
-                             (stream-cdr t))
-                 (weighted-pairs (stream-cdr s)
-                                 (stream-cdr t)
-                                 weight)
-                 weight)))
+  (cons-stream
+   (list (stream-car s) (stream-car t))
+   (merge-weighted
+    (stream-map (lambda (x) (list (stream-car s) x))
+                (stream-cdr t))
+    (weighted-pairs (stream-cdr s) (stream-cdr t) weight)
+    weight)))
 
-(define (cube-sum pair)
-    (let ((i (car pair))
-          (j (cadr pair)))
-      (+ (* i i i) (* j j j))))
+ (define (ramujan-numbers)
+   (define (sum-cubed x)
+     (let ((i (car x)) (j (cadr x)))
+       (+ (* i i i) (* j j j))))
+   (define (ramujans all-sum-cubes)
+     (let ((current (stream-car all-sum-cubes))
+            (next (stream-car (stream-cdr all-sum-cubes)))
+            (ramujan-candidate (sum-cubed current)))
+       (cond ((= ramujan-candidate
+                 (sum-cubed next))
+              (cons-stream (list ramujan-candidate current next)
+                           (ramujans (stream-cdr (stream-cdr all-sum-cubes)))))
+             (else (ramujans (stream-cdr all-sum-cubes))))))
+   (ramujans (weighted-pairs ints
+                             ints
+                             sum-cubed)))
+(define (run9)
+    (stream-display (ramujan-numbers) 2))
 
-;(define sortedStream (weighted-pairs cube-sum (integers-starting-from 0)
-                                            ;  (integers-starting-from 0)))
-
-(define (ramanujan s pre)
-    (let ((num (cubicSum (stream-car s))))
-        (cond ((= pre num)
-                   (cons-stream num (ramanujan (stream-cdr s) num)))
-              (else (ramanujan (stream-cdr s) num)))))
-
-
-
-;(define (run9)
-;    ;(display-stream (ramanujan sortedStream 0))
-;    (stream-display (ramanujan) 5))
+(run9)
 
 (println "assignment 3 loaded!")
