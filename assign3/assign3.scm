@@ -14,6 +14,26 @@
             (println $expr " is " result
                 " (it should be " target ")")))
 
+; Helpers for streams
+; Credits to Lusth
+
+(define scar stream-car)
+(define scdr stream-cdr)
+(define scons cons-stream)
+
+(define (svdisplay s n)
+	(cond
+		((= n 1) (print (scar s)))
+		((> n 1) (print (scar s) ",") (svdisplay (scdr s) (- n 1)))
+		(else nil)))
+
+(define (stream-display s n) (print "[") (svdisplay s n) (println "...]"))
+
+(define (stream-ref s n)
+    (if (= n 0)
+        (scar s)
+        (stream-ref (scdr s) (- n 1))))
+
 
 ;===================================Task 1======================================
 
@@ -568,30 +588,15 @@
 
 ;===================================Task 6======================================
 
-(define scar stream-car)
-(define scdr stream-cdr)
-(define scons cons-stream)
-
-(define (svdisplay s n)
-	(cond
-		((= n 1) (print (scar s)))
-		((> n 1) (print (scar s) ",") (svdisplay (scdr s) (- n 1)))
-		(else nil)))
-(define (stream-display s n) (print "[") (svdisplay s n) (println "...]"))
-(define (stream-ref s n)
-    (if (= n 0)
-        (scar s)
-        (stream-ref (scdr s) (- n 1))))
-
 (define (divisible? x y) (= (remainder x y) 0))
 
-(define (integers-starting-from n)
+(define (seven-and-eleven-primes n)
     (if (or (seven-primes n) (eleven-primes n))
-        (scons n (integers-starting-from (+ n 1)))
-        (integers-starting-from (+ n 1))))
+        (scons n (seven-and-eleven-primes (+ n 1)))
+        (seven-and-eleven-primes (+ n 1))))
 
 (define (big-gulp)
-    (integers-starting-from 7))
+    (seven-and-eleven-primes 7))
 
 (define (seven-primes n)
     (if (or (= n 7) (= n 11))
@@ -657,7 +662,6 @@
                          (scale-back-stream s dx))))
     int)
 
-
 (define poly (signal (lambda (x) (- (+ (* x x) (* 3 x)) 4)) 0 0.001))
 
 (define intPoly (integral poly 0.001))
@@ -701,7 +705,6 @@
     (let ((s0 (stream-ref s 0))
           (s1 (stream-ref s 1))
           (s2 (stream-ref s 2)))
-
         (scons (- s2 (/ (real (square (- s2 s1)))
                         (real (+ s0 (* (- 2) s1) s2))))
                (euler-transform (scdr s)))))
@@ -716,13 +719,16 @@
     (stream-map scar (make-tableau euler-transform (ps-mystery x))))
 
 (define (run8)
-    (stream-display (mystery 1) 10)
-    (stream-display (ps-mystery 1) 10)
-    (stream-display (acc-mystery 1) 10)
-    (stream-display (super-mystery 1) 10))
+    (stream-display (mystery 1) 5)
+    (stream-display (ps-mystery 1) 5)
+    (stream-display (acc-mystery 1) 5)
+    (stream-display (super-mystery 1) 5))
 
 
 ;===================================Task 9======================================
+
+(define (integers-starting-from n)
+    (scons n (integers-starting-from (+ n 1))))
 
 (define ints (integers-starting-from 1))
 
@@ -730,48 +736,34 @@
   (cond ((stream-null? s1) s2)
         ((stream-null? s2) s1)
         (else
-         (let ((s1car (stream-car s1))
-               (s2car (stream-car s2)))
-           (if (<= (weight s1car) (weight s2car))
-               (cons-stream s1car
-                            (merge-weighted (stream-cdr s1)
-                                            s2
-                                            weight))
-               (cons-stream s2car
-                            (merge-weighted s1
-                                            (stream-cdr s2)
-                                            weight)))))))
+            (if (<= (weight (scar s1)) (weight (scar s2)))
+                (scons (scar s1) (merge-weighted (scdr s1) s2 weight))
+                (scons (scar s2) (merge-weighted s1 (scdr s2) weight))))))
 
 (define (weighted-pairs s t weight)
-  (cons-stream
-   (list (stream-car s) (stream-car t))
-   (merge-weighted
-    (stream-map (lambda (x) (list (stream-car s) x))
-                (stream-cdr t))
-    (weighted-pairs (stream-cdr s) (stream-cdr t) weight)
-    weight)))
+    (scons (list (scar s) (scar t))
+           (merge-weighted (stream-map (lambda (x) (list (scar s) x))
+                                       (scdr t))
+                           (weighted-pairs (scdr s) (scdr t) weight)
+                           weight)))
 
-(define (sum-cubed x)
-  (let ((i (car x)) (j (cadr x)))
-    (+ (* i i i) (* j j j))))
+(define (sum-cubes x)
+    (define i (car x))
+    (define j (cadr x))
+    (+ (* i i i) (* j j j)))
 
- (define (ramujan-numbers)
-   (define (ramujans all-sum-cubes)
-     (let* ((current (stream-car all-sum-cubes))
-            (next (stream-car (stream-cdr all-sum-cubes)))
-            (ramujan-candidate (sum-cubed current)))
-       (cond ((= ramujan-candidate
-                 (sum-cubed next))
-              (cons-stream (list ramujan-candidate current next)
-                           (ramujans (stream-cdr (stream-cdr all-sum-cubes)))))
-             (else (ramujans (stream-cdr all-sum-cubes))))))
-   (ramujans (weighted-pairs ints
-                             ints
-                             sum-cubed)))
+(define (ram-stream s)
+    (define (scadr s) (scar (scdr s)))
+    (define (scddr s) (scdr (scdr s)))
+    (if (= (sum-cubes (scar s)) (sum-cubes (scadr s)))
+        (scons (sum-cubes (scar s))
+               (ram-stream (scddr s)))
+        (ram-stream (scdr s))))
+
+(define (ramanujan)
+    (ram-stream (weighted-pairs ints ints sum-cubes)))
+
 (define (run9)
-    (stream-display (weighted-pairs ints ints sum-cubed) 100))
-
-(run9)
-
+    (stream-display (ramanujan) 2))
 
 (println "assignment 3 loaded!")
