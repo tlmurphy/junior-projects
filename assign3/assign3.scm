@@ -556,6 +556,8 @@
     (define (remove) (unlock))
     this)
 
+; recursively call install?
+
 (define (run5)
     (debugSemaphore #t)
     (define b (barrier))
@@ -674,7 +676,7 @@
 ;===================================Task 8======================================
 
 (define (fact n)
-    (if (or (= n 1) (= n 0))
+    (if (= n 0)
         1
         (* n (fact (- n 1)))))
 
@@ -699,6 +701,7 @@
     (let ((s0 (stream-ref s 0))
           (s1 (stream-ref s 1))
           (s2 (stream-ref s 2)))
+
         (scons (- s2 (/ (real (square (- s2 s1)))
                         (real (+ s0 (* (- 2) s1) s2))))
                (euler-transform (scdr s)))))
@@ -713,10 +716,10 @@
     (stream-map scar (make-tableau euler-transform (ps-mystery x))))
 
 (define (run8)
-    (stream-display (mystery 1) 5)
-    (stream-display (ps-mystery 1) 5)
-    (stream-display (acc-mystery 1) 5)
-    (stream-display (super-mystery 1) 5))
+    (stream-display (mystery 1) 10)
+    (stream-display (ps-mystery 1) 10)
+    (stream-display (acc-mystery 1) 10)
+    (stream-display (super-mystery 1) 10))
 
 
 ;===================================Task 9======================================
@@ -748,12 +751,13 @@
     (weighted-pairs (stream-cdr s) (stream-cdr t) weight)
     weight)))
 
+(define (sum-cubed x)
+  (let ((i (car x)) (j (cadr x)))
+    (+ (* i i i) (* j j j))))
+
  (define (ramujan-numbers)
-   (define (sum-cubed x)
-     (let ((i (car x)) (j (cadr x)))
-       (+ (* i i i) (* j j j))))
    (define (ramujans all-sum-cubes)
-     (let ((current (stream-car all-sum-cubes))
+     (let* ((current (stream-car all-sum-cubes))
             (next (stream-car (stream-cdr all-sum-cubes)))
             (ramujan-candidate (sum-cubed current)))
        (cond ((= ramujan-candidate
@@ -765,8 +769,9 @@
                              ints
                              sum-cubed)))
 (define (run9)
-    (stream-display (ramujan-numbers) 2))
+    (stream-display (weighted-pairs ints ints sum-cubed) 100))
 
 (run9)
+
 
 (println "assignment 3 loaded!")
