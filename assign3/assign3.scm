@@ -457,8 +457,6 @@
     (connect product me)
     me)
 
-
-
 (define (divider m1 m2 result)
     (define (process-new-value)
       (cond ((or (and (has-value? m1) (= (get-value m1) 0))
@@ -499,7 +497,6 @@
   (connect connector me)
   (set-value! connector value me)
   me)
-
 
 (define (make-connector)
     (let ((value false) (informant false) (constraints '()))
@@ -608,11 +605,26 @@
         #t
         (and (divisible? n 11) (eleven-primes (/ n 11)))))
 
+(define (sevens n)
+    (scons n
+        (scons (sevens (* n 7))
+        (sevens (* n 11)))))
+
+(define (seven-elevens n)
+    (scons n (seven-elevens (* n 7 11))))
+
+(define (elevens n)
+    (scons n (sevens (* n 11))))
+
+(define (big-gulp2)
+    (sevens 7))
+
 (define bgs (big-gulp))
 
 (define (run6)
-    (stream-display bgs 9))
+    (stream-display bgs 8))
 
+(run6)
 
 ;===================================Task 7======================================
 
@@ -655,7 +667,7 @@
     int)
 
 (define (differential start s dx)
-    ; This gets the exact stream of the poly, can I have my bonus points?
+    ; This gets the exact stream of the poly I think...
     (define int
         (scons start
             (sub-streams (scale-back-stream (scdr s) dx)
@@ -688,9 +700,9 @@
 (define (mystery x)
     (define (mystery-stream term e)
         (if (even? term)
-            (scons (/ (real (^ x e)) (real (fact e))) (mystery-stream (+ term 1) (+ e 2)))
-            (scons (- (/ (real (^ x e)) (real (fact e)))) (mystery-stream (+ term 1) (+ e 2)))))
-    (mystery-stream 0 0))
+            (scons (/ (^ x e) (fact e)) (mystery-stream (+ term 1) (+ e 2)))
+            (scons (- (/ (^ x e) (fact e))) (mystery-stream (+ term 1) (+ e 2)))))
+    (mystery-stream 0 0.0))
 
 (define (ps-mystery x)
     (define sum
@@ -705,9 +717,11 @@
     (let ((s0 (stream-ref s 0))
           (s1 (stream-ref s 1))
           (s2 (stream-ref s 2)))
-        (scons (- s2 (/ (real (square (- s2 s1)))
-                        (real (+ s0 (* (- 2) s1) s2))))
-               (euler-transform (scdr s)))))
+        (if (= 0 (+ s0 (* (- 2) s1) s2))
+            (scons s1 (euler-transform (scdr s)))
+            (scons (- s2 (/ (square (- s2 s1))
+                         (+ s0 (* (- 2) s1) s2)))
+                   (euler-transform (scdr s))))))
 
 (define (acc-mystery x)
     (euler-transform (ps-mystery x)))
@@ -719,10 +733,10 @@
     (stream-map scar (make-tableau euler-transform (ps-mystery x))))
 
 (define (run8)
-    (stream-display (mystery 1) 5)
-    (stream-display (ps-mystery 1) 5)
-    (stream-display (acc-mystery 1) 5)
-    (stream-display (super-mystery 1) 5))
+    (stream-display (mystery 1) 10)
+    (stream-display (ps-mystery 1) 10)
+    (stream-display (acc-mystery 1) 10)
+    (stream-display (super-mystery 1) 10))
 
 
 ;===================================Task 9======================================
