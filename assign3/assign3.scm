@@ -664,13 +664,13 @@
 
 (define divIntPoly (differential (scar poly) intPoly 0.001))
 
-(define substreams (stream-map - poly divIntPoly))
+(define difference (stream-map - poly divIntPoly))
 
 (define (run7)
     (stream-display poly 10)
     (stream-display intPoly 10)
     (stream-display divIntPoly 10)
-    (stream-display substreams 10))
+    (stream-display difference 10))
 
 
 ;===================================Task 8======================================
