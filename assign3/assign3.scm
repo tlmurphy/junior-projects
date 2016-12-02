@@ -605,26 +605,10 @@
         #t
         (and (divisible? n 11) (eleven-primes (/ n 11)))))
 
-(define (sevens n)
-    (scons n
-        (scons (sevens (* n 7))
-        (sevens (* n 11)))))
-
-(define (seven-elevens n)
-    (scons n (seven-elevens (* n 7 11))))
-
-(define (elevens n)
-    (scons n (sevens (* n 11))))
-
-(define (big-gulp2)
-    (sevens 7))
-
 (define bgs (big-gulp))
 
 (define (run6)
-    (stream-display bgs 8))
-
-(run6)
+    (stream-display bgs 5))
 
 ;===================================Task 7======================================
 
