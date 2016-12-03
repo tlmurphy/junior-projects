@@ -618,7 +618,7 @@
     (stream-map - s1 s2))
 
 (define (scale-stream stream factor)
-    (stream-map (lambda (x) (* x  factor)) stream))
+    (stream-map (lambda (x) (* x factor)) stream))
 
 (define (scale-back-stream stream factor)
     (stream-map (lambda (x) (/ x factor)) stream))
@@ -634,20 +634,20 @@
     int)
 
 (define (differentialOld start s dx)
-    (define int
+    (define dif
         (scons start
             (scons (- start (scar s))
                    (sub-streams int
                                 (scdr s)))))
-    int)
+    dif)
 
 (define (differential start s dx)
     ; This gets the exact stream of the poly I think...
-    (define int
+    (define dif
         (scons start
             (sub-streams (scale-back-stream (scdr s) dx)
                          (scale-back-stream s dx))))
-    int)
+    dif)
 
 (define poly (signal (lambda (x) (- (+ (* x x) (* 3 x)) 4)) 0 0.001))
 
@@ -754,6 +754,6 @@
 
 (define (run9)
     (stream-display (ramanujan) 2))
-    
+
 
 (println "assignment 3 loaded!")
