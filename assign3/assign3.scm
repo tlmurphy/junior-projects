@@ -721,17 +721,17 @@
 
 (define ints (integers-starting-from 1))
 
-(define (merge-weighted s1 s2 weight)
+(define (merge s1 s2 weight)
   (cond ((stream-null? s1) s2)
         ((stream-null? s2) s1)
         (else
             (if (<= (weight (scar s1)) (weight (scar s2)))
-                (scons (scar s1) (merge-weighted (scdr s1) s2 weight))
-                (scons (scar s2) (merge-weighted s1 (scdr s2) weight))))))
+                (scons (scar s1) (merge (scdr s1) s2 weight))
+                (scons (scar s2) (merge s1 (scdr s2) weight))))))
 
 (define (weighted-pairs s t weight)
     (scons (list (scar s) (scar t))
-           (merge-weighted (stream-map (lambda (x) (list (scar s) x))
+           (merge (stream-map (lambda (x) (list (scar s) x))
                                        (scdr t))
                            (weighted-pairs (scdr s) (scdr t) weight)
                            weight)))
