@@ -563,14 +563,30 @@
 ;===================================Task 5======================================
 
 (define (barrier)
+    (define numOfThreads 0)
+    (define threads (list))
+
     (define (set threadNum)
-        (if (= threadNum 0)
-            nil
-            (begin
-                (tjoin (thread (gettid)))
-                (set (- threadNum 1)))))
-    (define (install) (lock))
-    (define (remove) (unlock))
+        (set! numOfThreads threadNum))
+
+    (define (install)
+        (define (iter numOfThreads)
+            (if (= numOfThreads 0)
+                'done
+                (begin
+                    (thread (lock))
+                    (iter (- numOfThreads 1)))))
+        (iter numOfThreads))
+
+    (define (remove)
+        (define (iter numOfThreads)
+            (if (= numOfThreads 0)
+                'done
+                (begin
+                    (thread (unlock))
+                    (iter (- numOfThreads 1)))))
+        (iter numOfThreads))
+
     this)
 
 ; recursively call install?
@@ -581,7 +597,7 @@
     ((b 'set) 3)
     ((b 'install))
     ((b 'remove)))
-
+    
 
 ;===================================Task 6======================================
 
@@ -630,7 +646,7 @@
     (stream-map (lambda (x) (* x  factor)) stream))
 
 (define (scale-back-stream stream factor)
-    (stream-map (lambda (x) (/ (real x) (real factor))) stream))
+    (stream-map (lambda (x) (/ x factor)) stream))
 
 (define (signal f x dx)
     (scons (f x) (signal f (+ x dx) dx)))
