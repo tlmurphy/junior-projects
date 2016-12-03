@@ -569,35 +569,10 @@
     (define (set threadNum)
         (set! numOfThreads threadNum))
 
-    (define (install)
-        (define (iter numOfThreads)
-            (if (= numOfThreads 0)
-                'done
-                (begin
-                    (thread (lock))
-                    (iter (- numOfThreads 1)))))
-        (iter numOfThreads))
-
-    (define (remove)
-        (define (iter numOfThreads)
-            (if (= numOfThreads 0)
-                'done
-                (begin
-                    (thread (unlock))
-                    (iter (- numOfThreads 1)))))
-        (iter numOfThreads))
-
     this)
 
 ; recursively call install?
 
-(define (run5)
-    (debugSemaphore #t)
-    (define b (barrier))
-    ((b 'set) 3)
-    ((b 'install))
-    ((b 'remove)))
-    
 
 ;===================================Task 6======================================
 
@@ -779,5 +754,6 @@
 
 (define (run9)
     (stream-display (ramanujan) 2))
+    
 
 (println "assignment 3 loaded!")
